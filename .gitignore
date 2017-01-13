@@ -1,0 +1,17 @@
+*.py[cod]
+dist/
+sdist/
+build/
+*.egg-info/
+*.
+
+**/*.ipynb_checkpoints
+
+.DS_Store
+
+intonatang/data/subject_data/**/*.mat
+intonatang/data/subject_data/**/*.h5
+
+intonatang/processed_neural_data/*.mat
+intonatang/processed_timit_data/*.h5
+intonatang/results/*.mat
