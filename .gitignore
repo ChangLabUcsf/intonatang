@@ -15,3 +15,5 @@ intonatang/data/subject_data/**/*.h5
 intonatang/processed_neural_data/*.mat
 intonatang/processed_timit_data/*.h5
 intonatang/results/*.mat
+
+docs/build/
