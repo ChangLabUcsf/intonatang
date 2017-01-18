@@ -63,7 +63,7 @@ def get_times_hg_for_subject_number(subject_number, only_good_trials=False, cont
     bad_indexes = []
     for bad_times_block, hg_block in zip(bad_times, hg):
         for bad_time in bad_times_block:
-            hg_block[:, np.round(bad_time[0]*100): np.round(bad_time[1]*100)] = np.NaN
+            hg_block[:, int(np.round(bad_time[0]*100)): int(np.round(bad_time[1]*100))] = np.NaN
         bad_indexes.append(np.isnan(hg_block))
 
     #To get a list of good trials for each block, we define bad trials as ones where stimulus on times overlap with
@@ -78,10 +78,9 @@ def get_times_hg_for_subject_number(subject_number, only_good_trials=False, cont
                 bad_trials_block.append(i)
             else:
                 indexes = np.zeros((hg_block.shape[1]))
-                indexes[stim_time[0]: stim_time[1]] = 1
+                indexes[int(stim_time[0]): int(stim_time[1])] = 1
                 if np.logical_and(indexes==1, bad_indexes_block==True).any():
                     bad_trials_block.append(i)
-        print(bad_trials_block)
         if control_stim:
             good_trials.append(list(set(np.arange(120)) - set(bad_trials_block)))
         elif missing_f0_stim:
@@ -331,7 +330,6 @@ def get_timelocked_activity(times, hg, zscore=True, hz=100, back=0, forward=250,
 
         baseline_mean = np.nanmean(baseline, axis=1)
         baseline_std = np.nanstd(baseline, axis=1)
-        print(baseline_std[209])
 
     for i, seconds in enumerate(times[0]):
         index = int(np.round(seconds * hz))

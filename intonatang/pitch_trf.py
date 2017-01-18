@@ -530,8 +530,8 @@ def randomize_timit_pitch_contours(timit_pitch, save_as=None):
         pitch_intensity_tables.append(pitch_intensity)
 
     timit_pitch = pd.concat(pitch_intensity_tables, keys=timit_names)
-    print(np.mean(timit_pitch['log_hz']))
-    print(np.std(timit_pitch['log_hz']))
+    #print(np.mean(timit_pitch['log_hz']))
+    #print(np.std(timit_pitch['log_hz']))
 
     if save_as is not None:
         filename = os.path.join(processed_timit_data_path, 'timit_pitch_shuffle_' + str(save_as) + '.h5')

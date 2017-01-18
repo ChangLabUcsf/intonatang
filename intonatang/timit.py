@@ -20,10 +20,9 @@ import glob
 
 import tables
 
-def generate_all_results():
-    save_timit_pitch()
-    save_timit_phonemes()
-    save_timit_pitch_phonetic()
+def generate_all_results(regenerate_processed_timit_data=False):
+    if regenerate_processed_timit_data:
+        generate_processed_timit_data()
 
     subject_numbers = [113, 118, 122, 123, 125, 129, 131]
     for subject_number in subject_numbers:
@@ -31,6 +30,11 @@ def generate_all_results():
         average_response = get_average_response_to_phonemes(out)
         psis = get_psis(out)
         save_average_response_psis_for_subject_number(subject_number, average_response, psis)
+
+def generate_processed_timit_data():
+    save_timit_pitch()
+    save_timit_phonemes()
+    save_timit_pitch_phonetic()
 
 
 phoneme_order = ['d','b','g','p','k','t','jh','sh','z','s','f','th','dh','v','w','r','l','ae','aa','ay','aw','ow','ax','uw','eh','ey','ih','ux','iy','n','m','ng']
@@ -236,14 +240,14 @@ def save_timit_pitch():
         pitch_intensity_tables.append(pitch_intensity)
 
     timit_pitch = pd.concat(pitch_intensity_tables, keys=timit_names)
-    print(np.mean(timit_pitch['log_hz']))  # -> 4.9406, (no log: 147.0387)
-    print(np.std(timit_pitch['log_hz']))   # -> 0.3112, (no log: 48.59846)
+    #print(np.mean(timit_pitch['log_hz']))  # -> 4.9406, (no log: 147.0387)
+    #print(np.std(timit_pitch['log_hz']))   # -> 0.3112, (no log: 48.59846)
     timit_pitch['abs_pitch'] = (timit_pitch['log_hz'] - np.mean(timit_pitch['log_hz']))/np.std(timit_pitch['log_hz'])
     timit_pitch['abs_pitch_erb'] = (timit_pitch['erb_rate'] - np.mean(timit_pitch['erb_rate']))/np.std(timit_pitch['erb_rate'])
     timit_pitch['abs_pitch_change'] = timit_pitch['abs_pitch'].diff()
     timit_pitch['abs_pitch_erb_change'] = timit_pitch['abs_pitch_erb'].diff()
-    print(np.mean(timit_pitch.intensity)) # -> 63.000
-    print(np.std(timit_pitch.intensity)) # -> 15.537
+    #print(np.mean(timit_pitch.intensity)) # -> 63.000
+    #print(np.std(timit_pitch.intensity)) # -> 15.537
     timit_pitch['zscore_intensity'] = (timit_pitch.intensity - np.mean(timit_pitch.intensity))/np.std(timit_pitch.intensity)
 
     filename = os.path.join(processed_timit_data_path, 'timit_pitch.h5')
@@ -259,49 +263,6 @@ def zscore_abs_pitch(pitch, reverse=False):
     else:
         pitch = np.log(pitch)
         return (pitch - 4.9406)/0.3112
-
-def save_timit_pitch_phonetic():
-    """This function combines timit_pitch with timit_phonemes and needs to be run after save_timit_pitch and save_timit_phonemes
-
-    """
-    timit_pitch = get_timit_pitch()
-    timit_phonemes = get_timit_phonemes()
-
-    timit_phonemes['start_index'] = (timit_phonemes['start_time'] * 100).round()
-    timit_phonemes['end_index'] = (timit_phonemes['end_time'] * 100).round()
-    
-    timit_pitch['phn'] = 'h#'
-
-    for i, row in enumerate(timit_phonemes.iterrows()):
-        if row[1]['phn'] != 'h#':
-            timit_name = row[0][0]
-            phn = row[1]['phn']
-            start_index = row[1]['start_index'] - 1
-            end_index = row[1]['end_index'] - 1 
-            
-            for index in np.arange(start_index, end_index):
-                timit_pitch.set_value((timit_name, index), 'phn', phn)
-    
-    for feat in phonetic_features:
-        timit_pitch[feat] = 0
-        
-    a = timit_phonemes['phn'].unique()
-    print(set(a) - set(phonetic_dict.keys()))
-    not_included = set(a) - set(phonetic_dict.keys())
-
-    for row in timit_pitch.iterrows():
-        if row[1]['phn'] not in not_included:
-            for val in phonetic_dict[row[1]['phn']]:
-                timit_pitch.set_value(row[0], val, 1)
-
-    filename = os.path.join(processed_timit_data_path, 'timit_pitch_phonetic.h5')
-    timit_pitch.to_hdf(filename, 'timit_pitch_phonetic')
-    return timit_pitch
-
-def get_timit_pitch_phonetic():
-    filename = os.path.join(processed_timit_data_path, 'timit_pitch_phonetic.h5')
-    timit_pitch = pd.read_hdf(filename, 'timit_pitch_phonetic')
-    return timit_pitch
 
 def get_timit_pitch():
     filename = os.path.join(processed_timit_data_path, 'timit_pitch.h5')
@@ -332,6 +293,48 @@ def get_timit_phonemes():
     filename = os.path.join(processed_timit_data_path, 'timit_phonemes.h5')
     timit_phonemes = pd.read_hdf(filename, 'timit_phonemes')
     return timit_phonemes
+
+def save_timit_pitch_phonetic():
+    """This function combines timit_pitch with timit_phonemes and needs to be run after save_timit_pitch and save_timit_phonemes
+
+    """
+    timit_pitch = get_timit_pitch()
+    timit_phonemes = get_timit_phonemes()
+
+    timit_phonemes['start_index'] = (timit_phonemes['start_time'] * 100).round()
+    timit_phonemes['end_index'] = (timit_phonemes['end_time'] * 100).round()
+    
+    timit_pitch['phn'] = 'h#'
+
+    for i, row in enumerate(timit_phonemes.iterrows()):
+        if row[1]['phn'] != 'h#':
+            timit_name = row[0][0]
+            phn = row[1]['phn']
+            start_index = row[1]['start_index'] - 1
+            end_index = row[1]['end_index'] - 1 
+            
+            for index in np.arange(start_index, end_index):
+                timit_pitch.set_value((timit_name, index), 'phn', phn)
+    
+    for feat in phonetic_features:
+        timit_pitch[feat] = 0
+        
+    a = timit_phonemes['phn'].unique()
+    not_included = set(a) - set(phonetic_dict.keys())
+
+    for row in timit_pitch.iterrows():
+        if row[1]['phn'] not in not_included:
+            for val in phonetic_dict[row[1]['phn']]:
+                timit_pitch.set_value(row[0], val, 1)
+
+    filename = os.path.join(processed_timit_data_path, 'timit_pitch_phonetic.h5')
+    timit_pitch.to_hdf(filename, 'timit_pitch_phonetic')
+    return timit_pitch
+
+def get_timit_pitch_phonetic():
+    filename = os.path.join(processed_timit_data_path, 'timit_pitch_phonetic.h5')
+    timit_pitch = pd.read_hdf(filename, 'timit_pitch_phonetic')
+    return timit_pitch
 
 def get_average_response_to_phonemes(out, phoneme_order=phoneme_order):
     """Returns the average response over all instances of each phoneme in TIMIT

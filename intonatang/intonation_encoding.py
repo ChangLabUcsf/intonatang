@@ -57,7 +57,6 @@ def single_electrode_encoding_all_weights(Y_mat, sns, sts, speakers, which_chans
     
     for chan in range(Y_mat.shape[0]):
         if chan in which_chans:
-            print(chan, end=" ")
 
             for i in range(Y_mat.shape[1]):
                 result = sm.OLS(Y_mat[chan, i, :], x).fit()
