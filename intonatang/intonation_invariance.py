@@ -13,9 +13,29 @@ from tqdm import tqdm
 from intonation_preanalysis import load_Y_mat_sns_sts_sps_for_subject_number
 
 def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=1000):
+    """Run the LDA invariance analysis on nonspeech control data.
+
+    This function contains the pipeline for the nonspeech invariance analysis. Here, we use LDA to fit a model on the 
+    neural activity time series to predict intonation condition using speech data. We then test this model on both held 
+    out speech data and the nonspeech control data. The accuracies for the model on the held out speech data and nonspeech
+    data are then returned and can be saved with ``save_control_test_accs``.
+
+    Args:
+        subject_number: xxx in ECxxx
+        solver: The type of solver to use for LDA. Can be "svd" or "lsqr". Only "lsqr" supports shrinkage/regularization.
+        shrinkage: The shrinkage parameter between 0 and 1. Default of 1 is diagonal LDA. 
+        n_perms: The number of permutations for held out speech data to run.
+
+    Returns:
+        (tuple):
+            * **accs** (*ndarray*): shape is (n_chans x n_perms x 3). The last dimension contains accuracy values for held out 
+                speech data, shuffled speech data, and shuffled nonspeech data
+            * **accs_test** (*ndarray*): shape is (n_chans). Contains accuracy value for nonspeech data. 
+    """
     Y_mat, sns, sts, sps, Y_mat_plotter = load_Y_mat_sns_sts_sps_for_subject_number(subject_number)
     Y_mat_c, sns_c, sts_c, sps_c, Y_mat_plotter_c = load_Y_mat_sns_sts_sps_for_subject_number(subject_number, control_stim=True)
 
+    # find time-points with NaNs across all trials to be excluded.
     Y_all = np.concatenate([Y_mat, Y_mat_c], axis=2)
     bad_time_indexes = np.isnan(np.sum(Y_all, axis=2))
 
@@ -38,6 +58,7 @@ def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=
     ofs1 = sts
     ofs2 = sts_c
 
+    # calculate performance accuracy of speech-fit LDA model on nonspeech data for each chan.
     for chan in np.arange(n_chans):
         Y_train = Y_mat[chan][~bad_time_indexes[chan]].T
         Y_test = Y_mat_c[chan][~bad_time_indexes[chan]].T
@@ -48,6 +69,7 @@ def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=
             lda.fit(Y_train, ofs1)
             accs_test[chan] = lda.score(Y_test, ofs2)
 
+    # calculate distribution of performance accuracies on held on speech data, shuffled speech data, and shuffled nonspeech data.
     for p in tqdm(np.arange(n_perms)):
         rand_perm_train = np.random.permutation(n_train_100)
         rand_perm_test = np.random.permutation(n_test_100)
@@ -62,7 +84,10 @@ def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=
             if Y_train.shape[1] < 1 or Y_test.shape[1] < 1:
                 accs[chan, p, :] = np.NaN
             else:
+                # fit the model on a random 80% of the speech data.
                 lda.fit(Y_train[rand_perm_train][np.arange(n_train_80)], ofs1[rand_perm_train][np.arange(n_train_80)])
+
+                # use the remaining 20% to bootstrap a set with n_test_100 trials.
                 Y_speech_test = Y_train[rand_perm_train][np.arange(n_train_80, n_train_100)]
                 Y_speech_shuffle = Y_train[shuffle_train][np.arange(n_train_80, n_train_100)]
                 ofs1_test = ofs1[rand_perm_train][np.arange(n_train_80, n_train_100)]
@@ -71,11 +96,51 @@ def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=
                 Y_speech_shuffle = Y_speech_shuffle[sample_inds]
                 ofs1_test = ofs1_test[sample_inds]
 
+                # save the performance accuracies
                 accs[chan, p, 0] = lda.score(Y_speech_test, ofs1_test)
                 accs[chan, p, 1] = lda.score(Y_speech_shuffle, ofs1_test)
                 accs[chan, p, 2] = lda.score(Y_test[shuffle_test], ofs2)
 
     return accs, accs_test
+
+def save_control_test_accs(subject_number, accs, accs_test, diagonal=True):
+    """Used to save the nonspeech control invariance analysis results. 
+
+    After running ``test_invariance_control``, save ``accs`` and ``accs_test`` for a subject.
+
+    Args:
+        subject_number: xxx in ECxxx
+        accs (ndarray): shape is (n_chans x n_perms x 3). The last dimension contains accuracy values for held out 
+                speech data, shuffled speech data, and shuffled nonspeech data
+        accs_test (ndarray): shape is (n_chans). Contains accuracy value for nonspeech data. 
+    
+        diagonal (bool): whether the invariance analysis used a shrinkage of 1 and was diagonal LDA.
+    """
+    info_str = ""
+    if diagonal:
+        info_str = info_str + "_diagonal"
+    filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
+    sio.savemat(filename, {'accs': accs, 'accs_test': accs_test})
+
+def load_control_test_accs(subject_number, diagonal=True):
+    """Used to load nonspeech control invariance analysis results.
+
+    Args:
+        subject_number: xxx in ECxxx
+        diagonal (bool): whether the invariance analysis used a shrinkage of 1 and was diagonal LDA.
+
+    Returns:
+        (tuple):
+            * **accs** (*ndarray*): shape is (n_chans x n_perms x 3). The last dimension contains accuracy values for held out 
+                speech data, shuffled speech data, and shuffled nonspeech data
+            * **accs_test** (*ndarray*): shape is (n_chans). Contains accuracy value for nonspeech data. 
+    """
+    info_str = ""
+    if diagonal:
+        info_str = info_str + "_diagonal"
+    filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
+    data = sio.loadmat(filename)
+    return data['accs'], data['accs_test']
 
 def test_invariance_missing_f0(subject_number, solver="lsqr", shrinkage=1, n_perms=1000):
     Y_mat, sns, sts, sps, Y_mat_plotter = load_Y_mat_sns_sts_sps_for_subject_number(subject_number)
@@ -90,7 +155,6 @@ def test_invariance_missing_f0(subject_number, solver="lsqr", shrinkage=1, n_per
     if solver == "svd":
         lda = LinearDiscriminantAnalysis()
     elif solver == "lsqr":
-        print('hi')
         lda = LinearDiscriminantAnalysis(solver=solver, shrinkage=shrinkage)
 
     accs = np.zeros((n_chans, n_perms, 4))
@@ -277,21 +341,6 @@ def load_invariance_test_accs(subject_number, test_accs_distribution=False, of_w
     filename = os.path.join(results_path, 'EC' + str(subject_number) + '_invariance_test_of_' + of_what + '_to_' + to_what + '_accs' + info_str + '.mat')
     data = sio.loadmat(filename)
     return data['accs']
-
-def save_control_test_accs(subject_number, accs, accs_test, diagonal=True):
-    info_str = ""
-    if diagonal:
-        info_str = info_str + "_diagonal"
-    filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
-    sio.savemat(filename, {'accs': accs, 'accs_test': accs_test})
-
-def load_control_test_accs(subject_number, diagonal=True):
-    info_str = ""
-    if diagonal:
-        info_str = info_str + "_diagonal"
-    filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
-    data = sio.loadmat(filename)
-    return data['accs'], data['accs_test']
 
 def residualize(Y_mat, by):
     Y_resid = np.copy(Y_mat)
