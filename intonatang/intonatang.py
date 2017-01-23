@@ -168,9 +168,9 @@ def plot_r2_single_electrode_encoding_all_subsets(centers, r2s, chan, ylabel="ad
 
 def plot_r2_single_electrode_encoding_single_subsets(centers, r2s, p_values, chan, ylim=None, yticks=None, mini=False):
     if not mini: 
-        seaborn.set_context("paper")
-        fig, ax = plt.subplots(1,1,figsize=(3,1.5))
-        label_font_size=8
+        seaborn.set_context("talk")
+        fig, ax = plt.subplots(1,1,figsize=(8,4))
+        label_font_size=16
     else:
         seaborn.set_context("paper")
         fig, ax = plt.subplots(1,1,figsize=(3,2))
@@ -202,7 +202,7 @@ def plot_r2_single_electrode_encoding_single_subsets(centers, r2s, p_values, cha
     if yticks is not None:
         ax.set_yticks(yticks)
     if not mini:
-        leg = ax.legend(hs, ['Intonation', 'Sentence', 'Speaker'], loc='center left', bbox_to_anchor=(1,0.5), fontsize=8)
+        leg = ax.legend(hs, ['Intonation', 'Sentence', 'Speaker'], loc='center left', bbox_to_anchor=(1,0.5), fontsize=16)
         for legobj in leg.legendHandles:
             legobj.set_linewidth(3)
         fig.tight_layout(rect=[0.05, 0.05, 0.68, 0.93])
@@ -211,15 +211,15 @@ def plot_r2_single_electrode_encoding_single_subsets(centers, r2s, p_values, cha
     seaborn.despine()
     return fig
 
-def plot_betas_prosody(centers, betas, p_values, chan, ylabel="Regression weight", xlabel='Time (bins)', ylim=None, mini=False, control_stim=False):
+def plot_betas_intonation(centers, betas, p_values, chan, ylabel="Regression weight", xlabel='Time (s)', ylim=None, mini=False, control_stim=False):
     if mini:
         seaborn.set_context("paper")
         fig, ax = plt.subplots(1,1,figsize=(3,2))
         label_fontsize=16
     else:
-        seaborn.set_context("talk", font_scale=2)
+        seaborn.set_context("talk")
         fig, ax = plt.subplots(1,1,figsize=(12,5))
-        label_fontsize=24
+        label_fontsize=16
 
     ax.locator_params(axis='y', nbins=4)
     colors = ['g', 'r', 'm']
@@ -231,6 +231,9 @@ def plot_betas_prosody(centers, betas, p_values, chan, ylabel="Regression weight
     else:
         beta = betas[chan, :, :][ :, [4, 5, 6]]
         p = p_values[chan,:,:][ :, [4, 5, 6]]
+
+    centers = centers/100
+
     hs = ax.plot(centers, beta)
     sig = p < 0.05/101
     for b, s in zip(beta.T, sig.T):
@@ -240,34 +243,34 @@ def plot_betas_prosody(centers, betas, p_values, chan, ylabel="Regression weight
         bplot[~s] = np.NaN
         ax.plot(c, bplot, linewidth=7)
 
-    ax.set(xlim=(-15, 285))
+    ax.set(xlim=(-.15, 2.85))
     ax.set_xlabel(xlabel, fontsize=label_fontsize)
     ax.set_ylabel(ylabel, fontsize=label_fontsize)
     if ylim is not None:
         ax.set_ylim(ylim)
     if mini == False:
         leg = ax.legend(hs, ['Question vs. Neutral', 'Emphasis 1 vs. Neutral', 'Emphasis 2 vs. Neutral'],
-                    loc='center left', bbox_to_anchor=(1,0.5), fontsize=24)
+                    loc='center left', bbox_to_anchor=(1,0.5), fontsize=label_fontsize)
         for legobj in leg.legendHandles:
             legobj.set_linewidth(10.0)    
         fig.tight_layout(rect=[0.05, 0.05, 0.6, 0.93])
     else:
         ax.set(yticklabels=[], xticklabels=[])
-
+    seaborn.despine()
     return fig
 
-def plot_betas_speakers(centers, betas, p_values, chan, ylabel="Regression weight", xlabel='Time (bins)', ylim=None, mini=False, control_stim=False):
+def plot_betas_speakers(centers, betas, p_values, chan, ylabel="Regression weight", xlabel='Time (s)', ylim=None, mini=False, control_stim=False):
     if mini:
         seaborn.set_context("paper")
         fig, ax = plt.subplots(1,1,figsize=(3,2))
         label_fontsize=16
     else:
-        seaborn.set_context("talk", font_scale=2)
+        seaborn.set_context("talk")
         fig, ax = plt.subplots(1,1,figsize=(12,5))
-        label_fontsize=24
+        label_fontsize=16
 
     ax.locator_params(axis='y', nbins=4)
-    colors = ['g', 'r', 'm']
+    colors =  ['#7A0071', '#4f8ae0']
     ax.set_prop_cycle(cycler('color', colors))
 
     if control_stim:
@@ -276,6 +279,9 @@ def plot_betas_speakers(centers, betas, p_values, chan, ylabel="Regression weigh
     else:
         beta = betas[chan, :, :][ :, [7, 8]]
         p = p_values[chan,:,:][ :, [7, 8]]
+
+    centers = centers/100
+
     hs = ax.plot(centers, beta)
     sig = p < 0.05/101
     for b, s in zip(beta.T, sig.T):
@@ -285,20 +291,20 @@ def plot_betas_speakers(centers, betas, p_values, chan, ylabel="Regression weigh
         bplot[~s] = np.NaN
         ax.plot(c, bplot, linewidth=7)
 
-    ax.set(xlim=(-15, 285))
+    ax.set(xlim=(-.15, 2.85))
     ax.set_xlabel(xlabel, fontsize=label_fontsize)
     ax.set_ylabel(ylabel, fontsize=label_fontsize)
     if ylim is not None:
         ax.set_ylim(ylim)
     if mini == False:
         leg = ax.legend(hs, ['Pitch', 'Formant'],
-                    loc='center left', bbox_to_anchor=(1,0.5), fontsize=24)
+                    loc='center left', bbox_to_anchor=(1,0.5), fontsize=label_fontsize)
         for legobj in leg.legendHandles:
             legobj.set_linewidth(10.0)    
         fig.tight_layout(rect=[0.05, 0.05, 0.6, 0.93])
     else:
         ax.set(yticklabels=[], xticklabels=[])
-
+    seaborn.despine()
     return fig
 
 def get_sig_elecs_from_full_model(subject_number, alpha=0.05/(256*101)):
@@ -360,7 +366,7 @@ def plot_pie_chart_for_subject_number(subject_number, use_r2=True, alpha=None, o
                   center=[img.shape[1]-120+(i*30), img.shape[0]-20], frame=True, wedgeprops={'linewidth':0})
     return fig, ax, stat_sums
 
-pie_chart_radius_by_subject_number = {113: 10, 118: 13, 122: 11, 123: 11, 125: 11, 129: 11, 131:10}
+pie_chart_radius_by_subject_number = {113: 10, 118: 14, 122: 11, 123: 11, 125: 11, 129: 12, 131:10}
 
 def get_brain_img_and_xy_for_subject_number(subject_number):
     subject = 'EC' + str(subject_number)

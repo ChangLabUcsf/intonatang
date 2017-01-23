@@ -686,8 +686,7 @@ def get_channel_order():
     return np.hstack(channel_order)
 
 def plot_trf(wts, chan):
-    #fig, axs = plt.subplots(2, 1, figsize=(2, 5), sharex=True)
-    fig, axs = plt.subplots(2, 1, figsize=(1.8, 2.8), sharex=True)
+    fig, axs = plt.subplots(2, 1, figsize=(3.5, 5), sharex=True)
     min_value = np.min(wts[chan].reshape(46,23)[3:43, 0:20])
     max_value = np.max(wts[chan].reshape(46,23)[3:43, 0:20])
     abs_value = np.max(np.abs([min_value, max_value]))
@@ -708,8 +707,7 @@ def plot_trf(wts, chan):
     return fig
 
 def plot_trf_rel_versus_change(wts, chan):
-    #fig, axs = plt.subplots(2, 1, figsize=(2, 5), sharex=True)
-    fig, axs = plt.subplots(2, 1, figsize=(1.8, 2.8), sharex=True)
+    fig, axs = plt.subplots(2, 1, figsize=(3.5, 5), sharex=True)
     min_value = np.min(wts[chan].reshape(46,34)[3:43, 10:30])
     max_value = np.max(wts[chan].reshape(46,34)[3:43, 10:30])
     abs_value = np.max(np.abs([min_value, max_value]))
