@@ -66,8 +66,9 @@ def generate_all_results():
         accs, accs_test = test_invariance_control(subject_number)
         save_control_test_accs(subject_number, accs, accs_test)
 
-def load_all_data():
-    subjects = [113, 118, 122, 123, 125, 129, 131]
+def load_all_data(subject_numbers=None):
+    if subject_numbers is None:
+        subject_numbers = [113, 118, 122, 123, 125, 129, 131]
     datas = []
     cats = []
     r_means = []
@@ -76,7 +77,7 @@ def load_all_data():
     r2s_abs = []
     r2s_rel = []
     wtss = []
-    for subject_number in subjects:
+    for subject_number in subject_numbers:
         r2_varpart, p_varpart, f_varpart = load_encoding_results(subject_number)
         data_varpart = pd.DataFrame(np.nanmax(r2_varpart, 1), columns=['sn', 'st', 'sp', 'sn st', 'sn sp', 'st sp', 'sn st sp'])
         data_varpart['subject_number'] = subject_number
@@ -352,9 +353,14 @@ def plot_pie_chart_for_subject_number(subject_number, use_r2=True, alpha=None, o
             if np.sum(stat_sums[chan]) > 0:
                 ax.pie(stat_sums[chan]*10, colors=colors, radius=0.5*radii[chan],
                     center=centers[chan], startangle=90, frame=True, wedgeprops={'linewidth':0})
+    ax.axis("off")
+    if on_brain:
+        for i, p in enumerate(np.sqrt(np.array([0.25, 0.5, 0.75, 1]))):
+            ax.pie([10.0, 2.0], colors=colors[::-1], radius=pie_chart_radius_by_subject_number[subject_number] * p,
+                  center=[img.shape[1]-120+(i*30), img.shape[0]-20], frame=True, wedgeprops={'linewidth':0})
     return fig, ax, stat_sums
 
-pie_chart_radius_by_subject_number = {113: 12, 118: 13, 122: 11, 123: 11, 125: 11, 129: 11, 131:10}
+pie_chart_radius_by_subject_number = {113: 10, 118: 13, 122: 11, 123: 11, 125: 11, 129: 11, 131:10}
 
 def get_brain_img_and_xy_for_subject_number(subject_number):
     subject = 'EC' + str(subject_number)

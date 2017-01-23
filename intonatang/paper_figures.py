@@ -240,10 +240,8 @@ def fig2():
     fig = plt.figure(figsize=(6, 7))
     gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[1.5, 1])
     gs_top = matplotlib.gridspec.GridSpecFromSubplotSpec(4, 4, subplot_spec=gs[0], wspace=0.12, hspace=0.12, width_ratios=[1,1,1,0.4])
-    gs_bottom = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], wspace=0.1, width_ratios=[1, 1.4])
-    gs_brain = matplotlib.gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gs_bottom[0], height_ratios=[0.5, 1])
-    gs_bottom_legend = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_brain[0, 1])
-    gs_bottom_right = matplotlib.gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_bottom_legend[0])
+    gs_bottom = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], wspace=0.3, width_ratios=[1, 1.5])
+    gs_brain = matplotlib.gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gs_bottom[0], height_ratios=[0.5, 1], width_ratios=[0.7, 1])
     gs_bar = matplotlib.gridspec.GridSpecFromSubplotSpec(3, 3, subplot_spec=gs_bottom[1], height_ratios=[0.1, 1, 0.3])
 
 
@@ -379,24 +377,10 @@ def fig2():
     # Proportion of variance explained as pie-charts on the brain
     imgs, xys = get_brain_imgs_and_xys([113])
 
-    # Whole brain image with inset rectangle
-    ax = plt.subplot(gs_brain[0, 0])
-    ax.imshow(imgs[0], cmap='Greys_r')
-    ax.add_patch(matplotlib.patches.Rectangle((310-10, 280-10), 280+20, 160+20, fill=False, linewidth=1))
-    ax.set(xticks=[], yticks=[])
-    ax.set_frame_on(False)
-
-    # Brain inset with pie charts
-    stat_sums, radii = tang.get_vars_for_pie_chart_for_subject_number(113)
-    colors = ['#5674ff','#ff2f97','#3fd400', 'k', 'k', 'k', 'k']
-    ax = plt.subplot(gs_brain[1, :])
-    ax.imshow(imgs[0], cmap='Greys_r')
-    for i in range(256):
-        if np.sum(stat_sums[i]) > 0:
-            ax.pie(stat_sums[i]*10, colors=colors, radius=9.4*radii[i],
-                    center=xys[0].T[i], startangle=90, frame=True, wedgeprops={'linewidth':0})
-    ax.set(xticklabels=[], yticklabels=[], yticks=[], xticks=[], xlim=(310, 590), ylim=(440, 280))
-    ax.set_frame_on(False)
+    # Whole brain image with inset rectangle and brain inset with pie charts
+    ax_brain = plt.subplot(gs_brain[0, 0])
+    ax_inset = plt.subplot(gs_brain[1, :])
+    brain_inset([ax_brain, ax_inset], 113)
 
     # Panel N
     # Box plots showing distribution of proportion of variance explained by main effects and interactions
@@ -419,7 +403,7 @@ def fig2():
 
     # Legend in Panel M
     ax = plt.subplot(gs_brain[0, 1])
-    plt.legend(patches, ['Intonation', 'Sentence', 'Speaker', 'All interactions'], loc=2, bbox_to_anchor=(0, 1.1))
+    plt.legend(patches, ['Intonation', 'Sentence', 'Speaker', 'All interactions'], loc=2, bbox_to_anchor=(-0.24, 1.1))
     ax.set_frame_on(False)
     ax.set(xticks=[], yticks=[])
 
@@ -427,15 +411,16 @@ def fig2():
     return fig
 
 def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 0.6, 0.8, 1.0], pie_radius=0.1, pie_center=(0.12, 0.75)):
-    df2 = pd.melt(df, id_vars=["cat"], var_name="predictor")
+    df2 = pd.melt(df, id_vars=["cat"], var_name="Predictor", value_name='Proportion of total R2')
 
-    boxplot_kws = {'x': 'predictor', 'y': 'value', 'palette': tang.encoding_colors, 'linewidth': 0.8, 'fliersize':3, 'orient': 'v'}
+    boxplot_kws = {'x': 'Predictor', 'y': 'Proportion of total R2', 'palette': tang.encoding_colors, 'linewidth': 0.8, 'fliersize':3, 'orient': 'v'}
     pie_kws = {'colors':tang.encoding_colors_black, 'radius':pie_radius, 'center':pie_center, 'startangle':90, 'frame':True, 'wedgeprops':{'linewidth': 0}}
 
     # Intonation electrodes
     df3 = df2[df2["cat"] == 1]
     ax = seaborn.boxplot(data=df3, ax=axs[0], **boxplot_kws)
-    ax.set(xticklabels=[])
+    ax.set(xlabel="")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
     pie_means = df[df['cat'] == 1].mean() * 100
     pie_means[pie_means < 0] = 0 
     pie_means = pie_means.values[:-1]
@@ -449,7 +434,7 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
     # Sentence electrodes
     df3 = df2[df2["cat"] == 0]
     ax = seaborn.boxplot(data=df3, ax=axs[1], **boxplot_kws)
-    ax.set(xticklabels=[])
+    ax.set(xticklabels=[], ylabel="")
     pie_means = df[df['cat'] == 0].mean() * 100
     pie_means[pie_means < 0] = 0
     pie_means = pie_means.values[:-1]
@@ -463,7 +448,7 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
     # Speaker electrodes
     df3 = df2[df2["cat"] == 2]
     ax = seaborn.boxplot(data=df3, ax=axs[2], **boxplot_kws)
-    ax.set(xticklabels=[])
+    ax.set(xticklabels=[], xlabel="", ylabel="")
     pie_means = df[df['cat'] == 2].mean() * 100
     pie_means[pie_means < 0] = 0 
     pie_means = pie_means.values[:-1]
@@ -474,7 +459,118 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
     ax1.set_frame_on(False)
     ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
 
+    for ax in axs:
+        seaborn.despine(ax=ax)
     return axs, patches
+
+def brain_inset(axs, subject_number):
+    imgs, xys = get_brain_imgs_and_xys([subject_number])
+    inset_xlim, inset_ylim = get_brain_inset_info(subject_number)
+
+    ax_brain, ax_inset = axs
+    ax_brain.imshow(imgs[0], cmap='Greys_r')
+    ax_brain.add_patch(matplotlib.patches.Rectangle((inset_xlim[0]-10, inset_ylim[1]-10), inset_xlim[1]-inset_xlim[0]+20, inset_ylim[0]-inset_ylim[1]+20, fill=False, linewidth=1))
+    ax_brain.set(xticks=[], yticks=[])
+    ax_brain.set_frame_on(False)
+
+    stat_sums, radii = tang.get_vars_for_pie_chart_for_subject_number(subject_number)
+    colors = ['#5674ff','#ff2f97','#3fd400', 'k', 'k', 'k', 'k']
+    ax_inset.imshow(imgs[0], cmap='Greys_r')
+    for i in range(256):
+        if np.sum(stat_sums[i]) > 0:
+            patches, texts = ax_inset.pie(stat_sums[i]*10, colors=colors, radius=pie_chart_radius_by_subject_number[subject_number]*radii[i],
+                    center=xys[0].T[i], startangle=90, frame=True, wedgeprops={'linewidth':0, 'clip_on':True})
+    ax_inset.set(xticklabels=[], yticklabels=[], yticks=[], xticks=[], xlim=inset_xlim, ylim=inset_ylim)
+
+    for i, p in enumerate(np.sqrt(np.array([0.25, 0.5, 0.75, 1]))):
+        ax_inset.pie([10.0, 2.0], colors=colors[::-1], radius=pie_chart_radius_by_subject_number[subject_number] * p,
+                  center=[inset_xlim[1]-60+((i**(5/4))*1.4*pie_chart_radius_by_subject_number[subject_number]), inset_ylim[0]+20], frame=True, wedgeprops={'linewidth':0})
+    return patches
+
+pie_chart_radius_by_subject_number = {113: 10, 118: 14, 122: 11, 123: 11, 125: 11, 129: 12, 131:10}
+
+def get_brain_inset_info(subject_number):
+    if subject_number == 113:
+        inset_xlim = (315, 585)
+        inset_ylim = (450, 270)
+    elif subject_number == 118:
+        inset_xlim = (486, 864)
+        inset_ylim = (636, 384)
+    elif subject_number == 122:
+        inset_xlim = (291.5, 588.5)
+        inset_ylim = (499, 301)
+    elif subject_number == 123:
+        inset_xlim = (326.5, 623.5)
+        inset_ylim = (504, 306)
+    elif subject_number == 125:
+        inset_xlim = (381.5, 678.5)
+        inset_ylim = (494, 296)
+    elif subject_number == 129:
+        inset_xlim = (313, 637)
+        inset_ylim = (478, 262)
+    elif subject_number == 131:
+        inset_xlim = (350, 620)
+        inset_ylim = (460, 280)
+    return inset_xlim, inset_ylim
+
+def sfig1():
+    fig = plt.figure(figsize=(6, 8))
+
+    gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 1])
+    gs_brains = matplotlib.gridspec.GridSpecFromSubplotSpec(4, 4, subplot_spec=gs[0], width_ratios=[0.7, 1, 0.7, 1], hspace=0.1)
+    gs_boxplots = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], wspace=0.3)
+    gs_left = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs_boxplots[0])
+    gs_right = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs_boxplots[1])
+
+    ax_brain = plt.subplot(gs_brains[0, 0])
+    ax_inset = plt.subplot(gs_brains[0, 1])
+    brain_inset([ax_brain, ax_inset], 113)
+    for i, subject_number in enumerate([118, 123, 125]):
+        ax_brain = plt.subplot(gs_brains[i+1, 0])
+        ax_inset = plt.subplot(gs_brains[i+1, 1])
+        brain_inset([ax_brain, ax_inset], subject_number)
+    for i, subject_number in enumerate([122, 131, 129]):
+        ax_brain = plt.subplot(gs_brains[i+1, 2])
+        ax_inset = plt.subplot(gs_brains[i+1, 3])
+        patches = brain_inset([ax_brain, ax_inset], subject_number)
+
+    ax = plt.subplot(gs_brains[0, 3])
+    patches = [patches[i] for i in [1, 0, 2, 3]]
+    plt.legend(patches, ['Intonation', 'Sentence', 'Speaker', 'All interactions'], loc=2, bbox_to_anchor=(0, 1.1))
+    ax.set_frame_on(False)
+    ax.set(xticks=[], yticks=[])
+
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([113, 118, 122, 123, 131])
+    ax1 = plt.subplot(gs_left[0])
+    ax2 = plt.subplot(gs_left[1])
+    ax3 = plt.subplot(gs_left[2])
+    axs1 = [ax1, ax2, ax3]
+    df = pd.DataFrame(r_mean_all, columns=['sn', 'st', 'sp', 'sn st' ,'sn sp' ,'st sp', 'sn st sp'])
+    df[df<0] = 0
+    df['total_r2'] = df.sum(axis=1)
+    for col in ['sn', 'st', 'sp', 'sn st' ,'sn sp' ,'st sp', 'sn st sp']:
+        df[col] = df[col]/df['total_r2']
+    df['cat'] = cat_all
+    df = df[['st', 'sn', 'sp', 'sn st', 'st sp', 'sn sp', 'sn st sp', 'cat']]
+    axs, patches = add_encoding_boxplots_to_axs(axs1, df)
+
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([125, 129])
+    ax1 = plt.subplot(gs_right[0])
+    ax2 = plt.subplot(gs_right[1])
+    ax3 = plt.subplot(gs_right[2])
+    axs2 = [ax1, ax2, ax3]
+    df = pd.DataFrame(r_mean_all, columns=['sn', 'st', 'sp', 'sn st' ,'sn sp' ,'st sp', 'sn st sp'])
+    df[df<0] = 0
+    df['total_r2'] = df.sum(axis=1)
+    for col in ['sn', 'st', 'sp', 'sn st' ,'sn sp' ,'st sp', 'sn st sp']:
+        df[col] = df[col]/df['total_r2']
+    df['cat'] = cat_all
+    df = df[['st', 'sn', 'sp', 'sn st', 'st sp', 'sn sp', 'sn st sp', 'cat']]
+    axs, patches = add_encoding_boxplots_to_axs(axs2, df)
+
+    for ax in axs1 + axs2:
+        seaborn.despine(ax=ax)
+    return fig
 
 def fig3():
     fig = plt.figure(figsize=(4.25, 5))
