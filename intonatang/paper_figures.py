@@ -966,6 +966,14 @@ def fig4():
     actual_means2 = [a[0] for a in actual_means_stes]
     actual_stes2 = [a[1] for a in actual_means_stes]
 
+    actual = np.concatenate(actual_means1, axis=1)
+    predicted_abs = np.concatenate(abs_pred1, axis=1)
+    predicted_rel = np.concatenate(rel_pred1, axis=1)
+    abs_pred_corr = pearsonr(actual[chan], predicted_abs[chan])
+    rel_pred_corr = pearsonr(actual[chan], predicted_rel[chan])
+    print("Corrrelation between actual and abs-only prediction: {:.2f}, (p={:.2e})".format(*abs_pred_corr))
+    print("Corrrelation between actual and rel-only prediction: {:.2f}, (p={:.2e})".format(*rel_pred_corr))
+
     axs = [] 
     for i in range(0, 4):
         axs_row = []
@@ -1019,6 +1027,11 @@ def fig4():
     rel_sig = data.rel_sig
     abs_sig = data.abs_sig
 
+    abs_st_corr = pearsonr(st_all, ap_all)
+    rel_st_corr = pearsonr(st_all, rp_all)
+    print("Corrrelation between intonation R2 and absolute pitch R2: {:.2f}, (p={:.2e})".format(*abs_st_corr))
+    print("Corrrelation between intonation R2 and relative pitch R2: {:.2f}, (p={:.2e})".format(*rel_st_corr))
+
     kws = {'marker': 'o', 'markersize': 3, 'linewidth': 0}
     ax_rel.plot(rp_all[rel_sig==0], st_all[rel_sig==0], color='k', **kws)
     ax_rel.plot(rp_all[rel_sig==1], st_all[rel_sig==1], color='#DB7D12', **kws)
@@ -1060,7 +1073,7 @@ def plot_speaker(xvals, means, stes, ax, chan):
         ax.fill_between(xvals, mean-ste, mean+ste, color=colors[i], alpha=0.3)
         ax.plot(xvals, mean, color=colors[i])
 
-def plot_pitch(ax1, ax2, ax3):
+def plot_pitch(ax1, ax2, ax3, return_handles=False):
     pitches, intensities = tang.get_continuous_pitch_and_intensity()
     x_grid = [0, 50, 100, 150, 200, 250]
     y_grid = [50, 100, 200, 400]
@@ -1080,8 +1093,8 @@ def plot_pitch(ax1, ax2, ax3):
     h8 = ax2.plot(pitches[7], 'm--')
     h5 = ax2.plot(pitches[4], 'b--')
 
-    ax3.plot(np.mean(pitches[0:4], axis=0), color='#49BFBF')
-    ax3.plot(np.mean(pitches[4:8], axis=0), color='#7A0071')
+    h9 = ax3.plot(np.mean(pitches[0:4], axis=0), color='#49BFBF')
+    h10 = ax3.plot(np.mean(pitches[4:8], axis=0), color='#7A0071')
 
     for ax in [ax1, ax2, ax3]:
         _ = ax.set(xticks=[0, 50, 100, 150, 200, 250], xlim=(-25,275), xticklabels=[])
@@ -1090,9 +1103,12 @@ def plot_pitch(ax1, ax2, ax3):
         ax.set(ylim=(45, 440), yticks=[50,100,200,400], yticklabels=['50','100','200','400'])
         ax.set_frame_on(False)
     ax1.set( ylabel="Pitch (Hz)")
-    hs = [h1[0], h2[0], h3[0], h4[0]]
 
-def add_ptrf_to_gs(gs, wts, chan):
+    hs = [[h1[0], h2[0], h3[0], h4[0]], [h9[0], h10[0]]]
+    if return_handles:
+        return hs
+
+def add_ptrf_to_gs(gs, wts, chan, shorten_ylabel=False):
     gs_abs = gridspec.GridSpecFromSubplotSpec(1, 2, width_ratios=[1, 0.2], subplot_spec=gs[0])
     gs_rel = gridspec.GridSpecFromSubplotSpec(1, 2, width_ratios=[1, 0.2], subplot_spec=gs[1])
     ax1 = plt.subplot(gs_abs[0])
@@ -1121,3 +1137,174 @@ def add_ptrf_to_gs(gs, wts, chan):
         yticks=(0, 3, 6, 9), yticklabels=[250, 200, 150, 90], ylabel="Absolute pitch\n(Hz)")
     im3.axes.set(xticks=[0, 39], xticklabels=[400, 0], xlabel="Delay (ms)", 
         yticks=(0,3,6,9), yticklabels=[1.7, 0.6, -0.5, -1.7], ylabel="Relative pitch\n(z-score)")
+    if shorten_ylabel:
+        im1.axes.set(ylabel="Abs. pitch (Hz)")
+        im3.axes.set(ylabel="Rel. pitch (z-score)")
+
+def sfig4():
+    fig = plt.figure(figsize=(6, 8))
+    gs = gridspec.GridSpec(2, 1, height_ratios=[4.2, 3])
+
+    gs_top = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[0], width_ratios=[0.25, 1], wspace=0.5)
+    gs_top_ptrf_padding = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs_top[0], height_ratios=[1.2, 2.2, 0.8], hspace=0)
+    gs_top_ptrf = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_top_ptrf_padding[1])
+    gs_top_pred = gridspec.GridSpecFromSubplotSpec(4, 3, subplot_spec=gs_top[1], height_ratios=[1.2, 1, 1, 1])
+
+    gs_bottom = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], width_ratios=[0.25, 1], wspace=0.5)
+    gs_bottom_ptrf_padding = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_bottom[0], height_ratios=[2.2, 0.8], hspace=0)
+    gs_bottom_ptrf = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_bottom_ptrf_padding[0])
+    gs_bottom_pred = gridspec.GridSpecFromSubplotSpec(3, 3, subplot_spec=gs_bottom[1])
+
+    ptrf_and_prediction(gs_top_ptrf, gs_top_pred, 113, 167, ylim=(-1.4, 2.8))
+    ptrf_and_prediction(gs_bottom_ptrf, gs_bottom_pred, 113, 53, with_stimulus=False)
+
+    return fig
+
+def sfig5():
+    fig = plt.figure(figsize=(6, 9.33))
+    gs = gridspec.GridSpec(3, 1, height_ratios=[4.2, 3, 1.2])
+
+    gs_top = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[0], width_ratios=[0.25, 1], wspace=0.5)
+    gs_top_ptrf_padding = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs_top[0], height_ratios=[1.2, 2.2, 0.8], hspace=0)
+    gs_top_ptrf = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_top_ptrf_padding[1])
+    gs_top_pred = gridspec.GridSpecFromSubplotSpec(4, 3, subplot_spec=gs_top[1], height_ratios=[1.2, 1, 1, 1])
+
+    gs_bottom = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], width_ratios=[0.25, 1], wspace=0.5)
+    gs_bottom_ptrf_padding = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_bottom[0], height_ratios=[2.2, 0.8], hspace=0)
+    gs_bottom_ptrf = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs_bottom_ptrf_padding[0])
+    gs_bottom_pred = gridspec.GridSpecFromSubplotSpec(3, 3, subplot_spec=gs_bottom[1])
+
+    gs_scatter = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[2])
+
+    ptrf_and_prediction(gs_top_ptrf, gs_top_pred, 129, 202, ylim=(-1.1, 1.6))
+    ptrf_and_prediction(gs_bottom_ptrf, gs_bottom_pred, 131, 195, with_stimulus=False, ylim=(-1.4, 4.2))
+
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data()
+
+    # Scatter plot of relative and absolute pitch encoding versus intonation condition encoding
+    ax_rel = plt.subplot(gs_scatter[0])
+    ax_abs = plt.subplot(gs_scatter[1])
+
+    data = datas[datas.sig_full == 1]
+    sp_all = data.sp
+    rp_all = data.r2_rel
+    ap_all = data.r2_abs
+    rel_sig = data.rel_sig
+    abs_sig = data.abs_sig
+
+    kws = {'marker': 'o', 'markersize': 3, 'linewidth': 0}
+    ax_rel.plot(rp_all[rel_sig==0], sp_all[rel_sig==0], color='k', **kws)
+    ax_rel.plot(rp_all[rel_sig==1], sp_all[rel_sig==1], color='#DB7D12', **kws)
+    ax_rel.set_ylabel('Speaker encoding (R2)')
+
+    ax_abs.plot(ap_all[abs_sig==0], sp_all[abs_sig==0], color='k', **kws)
+    ax_abs.plot(ap_all[abs_sig==1], sp_all[abs_sig==1], color='#C13639', **kws)
+
+    ax_abs.set_xlabel('Absolute pitch encoding (R2)')
+    ax_rel.set_xlabel('Relative pitch encoding (R2)')
+
+    abs_sp_corr = pearsonr(sp_all, ap_all)
+    rel_sp_corr = pearsonr(sp_all, rp_all)
+    print("Corrrelation between speaker R2 and absolute pitch R2: {:.2f}, (p={:.2e})".format(*abs_sp_corr))
+    print("Corrrelation between speaker R2 and relative pitch R2: {:.2f}, (p={:.2e})".format(*rel_sp_corr))
+
+    for ax in [ax_rel, ax_abs]:
+        ax.set_ylim((-0.05, 0.9))
+        ax.set_yticks(np.linspace(0, 0.8, 5))
+    ax_rel.set_xlim((-0.01, 0.09))
+    ax_abs.set_xlim((-0.03, 0.26))
+
+    seaborn.despine(ax=ax_abs)
+    seaborn.despine(ax=ax_rel)
+    return fig
+
+def ptrf_and_prediction(gs_ptrf, gs_pred, subject_number, chan, with_stimulus=True, ylim=(-1.8, 4)):
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([subject_number])
+    wts = wtss[0]
+
+    add_ptrf_to_gs(gs_ptrf, wts, chan, shorten_ylabel=True)
+
+    # Prediction of ptrf model on original intonation stimulus set
+    all_preds1, all_preds_ste1, abs_pred1, abs_pred_ste1, rel_pred1, rel_pred_ste1, all_preds2, all_preds_ste2, abs_pred2, abs_pred_ste2, rel_pred2, rel_pred_ste2 = ptrf.predict_response_to_intonation_stims(subject_number, chan)
+
+    Y_mat, sns, sts, sps, Y_mat_plotter = tang.load_Y_mat_sns_sts_sps_for_subject_number(subject_number, zscore_to_silence=False)
+    male = [Y_mat_plotter[:, :, np.logical_and(sps==1,sts==i)] for i in range(1,5)]
+    female = [Y_mat_plotter[:, :, np.logical_and(np.logical_or(sps==2,sps==3),sts==i)] for i in range(1,5)]
+    actual_means_stes = [erps.get_mean_and_ste(sp1_one)[0:2] for sp1_one in male + female]
+    actual_means1 = [a[0] for a in actual_means_stes]
+    actual_stes1 = [a[1] for a in actual_means_stes]
+    speakers = [Y_mat_plotter[:, :, sps==1], Y_mat_plotter[:, :, np.logical_or(sps==2, sps==3)]]
+    actual_means_stes = [erps.get_mean_and_ste(sp1_one)[0:2] for sp1_one in speakers]
+    actual_means2 = [a[0] for a in actual_means_stes]
+    actual_stes2 = [a[1] for a in actual_means_stes]
+
+    actual = np.concatenate(actual_means1, axis=1)
+    predicted_abs = np.concatenate(abs_pred1, axis=1)
+    predicted_rel = np.concatenate(rel_pred1, axis=1)
+    abs_pred_corr = pearsonr(actual[chan], predicted_abs[chan])
+    rel_pred_corr = pearsonr(actual[chan], predicted_rel[chan])
+    print("Prediction results for subject EC{}, chan {}".format(subject_number, chan))
+    print("Corrrelation between actual and abs-only prediction: {:.2f}, (p={:.2e})".format(*abs_pred_corr))
+    print("Corrrelation between actual and rel-only prediction: {:.2f}, (p={:.2e})".format(*rel_pred_corr))
+
+    ax_row_offset = 0
+    if with_stimulus:
+        ax_pitch0 = plt.subplot(gs_pred[0, 0])
+        ax_pitch1 = plt.subplot(gs_pred[0, 1])
+        ax_pitch2 = plt.subplot(gs_pred[0, 2])
+        ax_row_offset = 1
+
+    axs = [] 
+    for i in range(ax_row_offset, ax_row_offset+3):
+        axs_row = []
+        for j in range(0, 3):
+            axs_row.append(plt.subplot(gs_pred[i, j]))
+        axs.append(axs_row)
+    axs = np.array(axs)
+    xvals = np.arange(0,300)/100 - 0.25
+
+    if with_stimulus:
+        # Pitch contours by intonation contour (first two) and average pitch contour by sex (last one)
+        hs = plot_pitch(ax_pitch0, ax_pitch1, ax_pitch2, return_handles=True)
+        leg1 = ax_pitch1.legend(hs[0], ['Neutral', 'Question', 'Emphasis 1', 'Emphasis 2'], loc=2, bbox_to_anchor=(0.2, 1.2))
+        leg2 = ax_pitch2.legend(hs[1], ['Female', 'Male'], loc=2, bbox_to_anchor=(0.2, 1.2))
+        for leg in [leg1, leg2]:
+            frame = leg.get_frame()
+            frame.set_facecolor("white")
+        for ax in [ax_pitch0, ax_pitch1, ax_pitch2]:
+            seaborn.despine(ax=ax)
+
+    # Predicted and actual high-gamma by intonation contour for two sexes shown separately
+    plot_intonation(xvals, abs_pred1[0:4], abs_pred_ste1[0:4], axs[0][1], chan)
+    plot_intonation(xvals, abs_pred1[4:8], abs_pred_ste1[4:8], axs[0][0], chan)
+    plot_intonation(xvals, rel_pred1[0:4], rel_pred_ste1[0:4], axs[1][1], chan)
+    plot_intonation(xvals, rel_pred1[4:8], rel_pred_ste1[4:8], axs[1][0], chan)
+    plot_intonation(xvals, actual_means1[0:4], actual_stes1[0:4], axs[2][1], chan)
+    plot_intonation(xvals, actual_means1[4:8], actual_stes1[4:8], axs[2][0], chan)
+
+    # Predicted and actual high-gamnma averaged over sex of speaker
+    plot_speaker(xvals, abs_pred2[0:3], abs_pred_ste2[0:3], axs[0][2], chan)
+    plot_speaker(xvals, rel_pred2[0:3], rel_pred_ste2[0:3], axs[1][2], chan)
+    plot_speaker(xvals, actual_means2[0:3], actual_stes2[0:3], axs[2][2], chan)
+
+    if with_stimulus:
+        ax_pitch0.set(title="Female speaker")
+        ax_pitch1.set(title="Male speaker")
+        for ax in [ax_pitch1, ax_pitch2]:
+            ax.set(yticklabels=[])
+    else:
+        axs[0][0].set(title="Female speaker")
+        axs[0][1].set(title="Male speaker")
+    axs[0][0].set(ylabel="Abs only\nprediction")
+    axs[1][0].set(ylabel="Rel only\nprediction")
+    axs[2][0].set(ylabel="Actual")
+
+    for ax in axs.flatten():
+        ax.set(xlim=(-0.25, 2.75), xticks=[0, 0.5, 1, 1.5, 2, 2.5], xticklabels=[], ylim=ylim)
+    for ax in axs[:, 1:].flatten():
+        ax.set(yticklabels=[])
+    for ax in axs[2,:]:
+        ax.set(xticklabels=['0', '0.5', '1', '1.5', '2', '2.5'], xlabel="Time (s)")
+
+    for ax in axs.flatten():
+        seaborn.despine(ax=ax)
