@@ -358,19 +358,22 @@ def get_average_response_to_phonemes(out, phoneme_order=phoneme_order):
     return average_response
 
 def get_psis(out, phoneme_order=phoneme_order):
+    # timit_phonemes is a dataframe containing information about phoneme onsets in timit sentences
     timit_phonemes = get_timit_phonemes()
-    names = [i[0] for i in out.items()]
+    names = [i[0] for i in out.items()] # timit sentences that are in a given subject's out data file
     timit_phonemes = timit_phonemes[timit_phonemes.index.get_level_values(0).isin(names)]
+
     psis = np.zeros((256, len(phoneme_order))) 
 
     #Get the distribution of high-gamma values at 110ms after phoneme onset for each electrode for each phoneme.
     #The phoneme is the key used in the dict activitiy_distributions
     activity_distributions = {}
     for phoneme in phoneme_order:
-        phonemes = timit_phonemes[timit_phonemes.phn == phoneme]
+        # all instances of a specific phoneme in the set of timit sentences a subject heard
+        phoneme_instances = timit_phonemes[timit_phonemes.phn == phoneme]
 
-        activity_phoneme = np.zeros((256, len(phonemes)))
-        for i, trial in enumerate(phonemes.iterrows()):
+        activity_phoneme = np.zeros((256, len(phonemes_instances)))
+        for i, trial in enumerate(phonemes_instances.iterrows()):
             timit_name = trial[0][0]
             start_time = trial[1].start_time
             index = np.int(round((start_time + 0.11)*100) + 50)
@@ -380,17 +383,12 @@ def get_psis(out, phoneme_order=phoneme_order):
         activity_distributions[phoneme] = activity_phoneme
 
     phonemes = set(phoneme_order)
-    z_stats = []
-    p_values = []
-    for p_index, phoneme in enumerate(phoneme_order):
-        dist1 = activity_distributions[phoneme]
 
-        for phoneme2 in phonemes - set([phoneme]):
+    for p_index, phoneme1 in enumerate(phoneme_order):
+        dist1 = activity_distributions[phoneme1]
+
+        for phoneme2 in phonemes - set([phoneme1]):
             dist2 = activity_distributions[phoneme2]
-
-            z_stat, p_value = stats.ranksums(dist1[70,:], dist2[70,:])
-            z_stats.append(z_stat)
-            p_values.append(p_value)
 
             for chan in np.arange(256):
                 z_stat, p_value = stats.ranksums(dist1[chan,:], dist2[chan,:])
