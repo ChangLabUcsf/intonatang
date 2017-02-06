@@ -155,7 +155,7 @@ def get_speech_responsive_chans(out):
     return sig_chans
 
 def load_tables_out(subject_number):
-    filename = os.path.join(subject_data_path, 'EC' + str(subject_number) + '.h5')
+    filename = os.path.join(subject_data_path, 'EC' + str(subject_number), 'EC' + str(subject_number) + '_timit.h5')
     f = tables.open_file(filename)
     if subject_number == 113:
         out = f.root.EC113
@@ -174,7 +174,7 @@ def load_tables_out(subject_number):
     return out
 
 def load_h5py_out(subject_number):
-    filename = os.path.join(subject_data_path, 'EC' + str(subject_number) + '.h5')
+    filename = os.path.join(subject_data_path, 'EC' + str(subject_number), 'EC' + str(subject_number) + '_timit.h5')
     f = h5py.File(filename, 'r')  
     return f['EC' + str(subject_number)]
 
