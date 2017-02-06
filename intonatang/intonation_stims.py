@@ -1,3 +1,5 @@
+from __future__ import division, print_function, absolute_import
+
 import os
 pitch_info_path = os.path.join(os.path.dirname(__file__), 'data', 'pitch')
 

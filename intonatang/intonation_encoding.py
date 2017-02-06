@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
 import os
 results_path = os.path.join(os.path.dirname(__file__), 'results')

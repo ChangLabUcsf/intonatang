@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 import os
 results_path = os.path.join(os.path.dirname(__file__), 'results')
@@ -10,7 +10,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 from tqdm import tqdm
 
-from intonation_preanalysis import load_Y_mat_sns_sts_sps_for_subject_number
+from .intonation_preanalysis import load_Y_mat_sns_sts_sps_for_subject_number
 
 def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=1000):
     """Run the LDA invariance analysis on nonspeech control data.

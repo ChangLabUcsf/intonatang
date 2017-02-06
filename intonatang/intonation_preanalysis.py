@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
 import os
 processed_data_path = os.path.join(os.path.dirname(__file__), 'processed_neural_data')
@@ -8,8 +8,8 @@ import numpy as np
 from scipy.stats import zscore
 import scipy.io as sio
 
-from intonation_subject_data import get_blocks_for_subject_number, get_stims_for_subject_number
-from intonation_subject_data import get_sentence_numbers_sentence_types_speakers_for_stims_list
+from .intonation_subject_data import get_blocks_for_subject_number, get_stims_for_subject_number
+from .intonation_subject_data import get_sentence_numbers_sentence_types_speakers_for_stims_list
 
 
 def get_times_hg_for_subject_number(subject_number, only_good_trials=False, control_stim=False, missing_f0_stim=False, use_log_hg=False):

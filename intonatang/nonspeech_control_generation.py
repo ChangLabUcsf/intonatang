@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 import os
 data_path = os.path.join(os.path.dirname(__file__), 'data')
@@ -11,7 +11,7 @@ import pandas as pd
 from scipy.signal import sweep_poly
 from scipy import signal
 
-from intonation_stims import get_continuous_pitch_and_intensity
+from .intonation_stims import get_continuous_pitch_and_intensity
 
 def save_non_linguistic_control_stimuli(missing_f0=False, add_noise=None, stretch_factor=0):
     pitches, _ = get_continuous_pitch_and_intensity()

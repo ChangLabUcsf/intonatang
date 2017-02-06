@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
 import os
 intonation_tokens_path = os.path.join(os.path.dirname(__file__), 'data', 'tokens')
@@ -20,10 +20,10 @@ import librosa
 from cycler import cycler
 
 
-import intonatang as tang
-import timit
-import pitch_trf as ptrf
-import erps
+from . import intonatang as tang
+from . import timit
+from . import pitch_trf as ptrf
+from . import erps
 
 import seaborn
 seaborn.set_style("ticks", {'xtick.major.size':2, 'ytick.major.size':2, 'ytick.minor.size':0, 'xtick.minor.size':0, 'axes.linewidth': 1})

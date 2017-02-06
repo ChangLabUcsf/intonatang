@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 import os
 subject_data_path = os.path.join(os.path.dirname(__file__), 'data', 'subject_data')
@@ -15,10 +15,9 @@ import matplotlib
 
 import pandas as pd
 import h5py
-
+import tables
 import glob
 
-import tables
 
 def generate_all_results(regenerate_processed_timit_data=False):
     if regenerate_processed_timit_data:

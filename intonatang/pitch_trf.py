@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
 import os
 results_path = os.path.join(os.path.dirname(__file__), 'results')
@@ -11,10 +11,10 @@ from scipy.stats import zscore
 import matplotlib.pyplot as plt
 import sklearn.model_selection as model_selection
 import pandas as pd
-import timit
 import random
 
-from intonation_stims import get_pitch_and_intensity
+from . import timit
+from .intonation_stims import get_pitch_and_intensity
 
 def generate_all_results(regenerate_shuffled_timit_data=False):
     subject_numbers = [113, 118, 122, 123, 125, 129, 131]

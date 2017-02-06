@@ -1,5 +1,7 @@
+from __future__ import division, print_function, absolute_import
+
 import numpy as np
-from intonation_stims import *
+from .intonation_stims import *
 
 def get_blocks_for_subject_number(subject_number, control_stim=False, missing_f0_stim=False):
     """Returns list of block numbers for each subject. 

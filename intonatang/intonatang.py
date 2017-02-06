@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
 import os
 brain_data_path = os.path.join(os.path.dirname(__file__), 'data', 'brain_imaging')
@@ -17,23 +17,23 @@ from sklearn.decomposition import PCA
 from cycler import cycler
 import pandas as pd
 
-from intonation_stims import get_pitch_and_intensity, get_continuous_pitch_and_intensity
+from .intonation_stims import get_pitch_and_intensity, get_continuous_pitch_and_intensity
 
-from intonation_preanalysis import get_times_hg_for_subject_number, get_bcs, get_gcs, get_stg, get_centers
-from intonation_preanalysis import save_Y_mat_sns_sts_sps_for_subject_number, load_Y_mat_sns_sts_sps_for_subject_number
+from .intonation_preanalysis import get_times_hg_for_subject_number, get_bcs, get_gcs, get_stg, get_centers
+from .intonation_preanalysis import save_Y_mat_sns_sts_sps_for_subject_number, load_Y_mat_sns_sts_sps_for_subject_number
 
-from intonation_encoding import single_electrode_encoding_varpart, single_electrode_encoding_all_weights
-from intonation_encoding import save_encoding_results, load_encoding_results
-from intonation_encoding import save_encoding_results_all_weights, load_encoding_results_all_weights
+from .intonation_encoding import single_electrode_encoding_varpart, single_electrode_encoding_all_weights
+from .intonation_encoding import save_encoding_results, load_encoding_results
+from .intonation_encoding import save_encoding_results_all_weights, load_encoding_results_all_weights
 
-from nonspeech_control_generation import save_non_linguistic_control_stimuli
+from .nonspeech_control_generation import save_non_linguistic_control_stimuli
 
-from intonation_invariance import test_invariance, test_invariance_control, save_invariance_test_accs, save_control_test_accs
-from intonation_invariance import load_control_test_accs, load_invariance_test_accs, test_invariance_missing_f0
+from .intonation_invariance import test_invariance, test_invariance_control, save_invariance_test_accs, save_control_test_accs
+from .intonation_invariance import load_control_test_accs, load_invariance_test_accs, test_invariance_missing_f0
 
-from pitch_trf import load_cv_model_fold, get_intonation_tokens_stim
+from .pitch_trf import load_cv_model_fold, get_intonation_tokens_stim
 
-import erps
+from . import erps
 
 encoding_colors = ['#ff2f97', '#5674ff', '#3fd400' , '#ae55c6', '#4ea47e', '#d3c26a', '#999999']
 encoding_colors_black = ['#ff2f97', '#5674ff', '#3fd400' , 'k']
