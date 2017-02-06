@@ -12,6 +12,8 @@ build/
 intonatang/data/subject_data/**/*.mat
 intonatang/data/subject_data/**/*.h5
 
+intonatang/data/timit_tokens/*.wav
+
 intonatang/processed_neural_data/*.mat
 intonatang/processed_timit_data/*.h5
 intonatang/results/*.mat
