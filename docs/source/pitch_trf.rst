@@ -1,5 +1,5 @@
 Pitch Temporal Receptive Field Analysis
 =======================================
 
-.. automodule:: pitch_trf
+.. automodule:: intonatang.pitch_trf
    :members:

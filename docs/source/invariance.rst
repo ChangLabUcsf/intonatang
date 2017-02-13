@@ -7,5 +7,5 @@ to fit models to predict intonation contour (i.e. the intonation/sentence_type c
 the neural activity time series from each electrode. These models were fit on one data set and tested on another, 
 and the performance accuracies of the model on different test sets were compared.
 
-.. automodule:: intonation_invariance
+.. automodule:: intonatang.intonation_invariance
    :members:

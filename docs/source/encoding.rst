@@ -6,5 +6,5 @@ Encoding analyses are equivalent to three-way ANOVA with intonation, sentence, a
 were coded as dichotomous variables using the simple coding method where regression weights can be interpreted as difference from a reference level of each categorical variable and the intercept 
 is equal to grand mean over all trials. 
 
-.. automodule:: intonation_encoding
+.. automodule:: intonatang.intonation_encoding
    :members:

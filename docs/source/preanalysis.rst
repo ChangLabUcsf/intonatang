@@ -33,5 +33,5 @@ Two toggleable options for generating the Y_mat.mat files using ``save_Y_mat_sns
     2. ``zscore_to_silence`` (*bool*): whether to z-score neural activity to a silent baseline (otherwise z-score to the entire block). 
         The silent baseline consists of silent periods within the intertrial interval that exclude the first 500ms after stimulus offset.
 
-.. automodule:: intonation_preanalysis
+.. automodule:: intonatang.intonation_preanalysis
    :members:
