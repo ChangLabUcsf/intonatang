@@ -149,6 +149,24 @@ def run_ptrf_analysis_permutation_test(subject_number, pitch_scaling="log"):
 
     save_cv_shuffle_fold(subject_number, r2_all_perms, r2_abs_perms, r2_rel_perms)
 
+def get_abs_and_rel_sig(subject_number):
+    r_all, r_abs, r_rel, abs_r2, rel_r2, wts_all, wts_abs, wts_rel = load_cv_model_fold(subject_number)
+    ptrf_permutation_data = sio.loadmat(os.path.join(results_path, 'EC' + str(subject_number) + '_shuffle25_25fold_ptrf_results_10bins.mat'))
+    r2_abs_perms = ptrf_permutation_data['r2_abs']
+    r2_rel_perms = ptrf_permutation_data['r2_rel']
+    abs_sig = np.ones((256)) * -1
+    rel_sig = np.ones((256)) * -1
+    for chan in np.arange(256):
+        if rel_r2[0, chan] > np.percentile(r2_rel_perms[chan], [95])[0]:
+            rel_sig[chan] = 1
+        else:
+            rel_sig[chan] = 0
+        if abs_r2[0, chan] > np.percentile(r2_abs_perms[chan], [95])[0]:
+            abs_sig[chan] = 1
+        else:
+            abs_sig[chan] = 0
+    return abs_sig, rel_sig
+
 def get_neural_activity_and_pitch_phonetic_for_fold(out_h5py, timit_pitch, fold, pitch_scaling="log"):
     out = out_h5py
     n_sentences = len(out)

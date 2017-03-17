@@ -31,7 +31,7 @@ from .nonspeech_control_generation import save_non_linguistic_control_stimuli
 from .intonation_invariance import test_invariance, test_invariance_control, save_invariance_test_accs, save_control_test_accs
 from .intonation_invariance import load_control_test_accs, load_invariance_test_accs, test_invariance_missing_f0
 
-from .pitch_trf import load_cv_model_fold, get_intonation_tokens_stim
+from .pitch_trf import load_cv_model_fold, get_intonation_tokens_stim, get_abs_and_rel_sig
 
 from . import erps
 
@@ -116,20 +116,7 @@ def load_all_data(subject_numbers=None):
         data_varpart['r2_abs'] = abs_r2[0, :256]
         data_varpart['r2_rel'] = rel_r2[0, :256]
 
-        ptrf_permutation_data = sio.loadmat(os.path.join(results_path, 'EC' + str(subject_number) + '_shuffle25_25fold_ptrf_results_10bins.mat'))
-        r2_rel_perms = ptrf_permutation_data['r2_rel']
-        r2_abs_perms = ptrf_permutation_data['r2_abs']
-        rel_sig = np.ones((256)) * -1
-        abs_sig = np.ones((256)) * -1
-        for chan in np.arange(256):
-            if data_varpart.iloc[chan].r2_rel > np.percentile(r2_rel_perms[chan], [95])[0]:
-                rel_sig[chan] = 1
-            else:
-                rel_sig[chan] = 0
-            if data_varpart.iloc[chan].r2_abs > np.percentile(r2_abs_perms[chan], [95])[0]:
-                abs_sig[chan] = 1
-            else:
-                abs_sig[chan] = 0
+        abs_sig, rel_sig = get_abs_and_rel_sig(subject_number)
         data_varpart['rel_sig'] = rel_sig
         data_varpart['abs_sig'] = abs_sig
 
