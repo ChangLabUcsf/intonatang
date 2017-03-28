@@ -1,3 +1,7 @@
+"""Code for fitting temporal receptive models using Ridge (L2 regularized) regression.
+
+"""
+
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
@@ -102,6 +106,23 @@ def run_cv_temporal_ridge_regression_model(stim, resp, delays=get_delays(), alph
     return test_corr_folds, wts_folds
 
 def run_cv_temporal_ridge_regression_model_fold(stims, resps, delays=get_delays(), alphas=get_alphas()):
+    """Fit trf models with user-given split of data into training, validation, and test.
+
+    Args:
+        stims (list): list of stim data split into training, validation, and test
+            i.e. [train_stim, ridge_stim, test_stim] where train_stim is (n_training_samples x n_features)
+        resps (list): list of resp data split into training, validation, and test.
+            The number of samples in each set should match that for the stims.
+
+    Returns:
+        (tuple)
+            * **test_corr** (*ndarray*): Correlation between predicted and actual responses on
+                test set using wts computed for alpha with best performance on validation set. 
+                Shape of test_corr is (n_chans)
+            * **wts** (*ndarray*): Computed regression weights using best alpha from testing on 
+                validation set. Shape of wts is (n_chans, n_features)
+
+    """
     dstims = [get_dstim(stim, delays) for stim in stims]
     n_chans = resps[0].shape[1]
 
@@ -110,13 +131,10 @@ def run_cv_temporal_ridge_regression_model_fold(stims, resps, delays=get_delays(
     best_wts = [wts_alphas[best_alphas[chan], :, chan] for chan in range(n_chans)]
     test_pred = [np.dot(dstims[2], best_wts[chan]) for chan in range(n_chans)]
     test_corr = np.array([np.corrcoef(test_pred[chan], resps[2][:, chan])[0,1] for chan in range(n_chans)])
-
     test_corr[np.isnan(test_corr)] = 0
-    return test_corr, np.array(best_wts)
 
-def get_all_pred(wts, dstim):
-    all_pred = np.array([np.dot(dstim, wts[chan]) for chan in range(wts.shape[0])])
-    return all_pred
+    wts = np.array(best_wts)
+    return test_corr, wts
 
 def run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas):
     """Runs ridge (L2 regularized) regression for ridge parameters in alphas and returns wts fit
@@ -188,6 +206,29 @@ def run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
         wts[alpha_i, :, :] = wt
 
     return wts, ridge_corrs
+
+def get_all_pred(wts, dstim):
+    all_pred = np.array([np.dot(dstim, wts[chan]) for chan in range(wts.shape[0])])
+    return all_pred
+
+def reshape_wts_to_2d(wts, delays_used=get_delays(), delay_edges_added=True):
+    """Expand the 1d array of wts to the 2d shape of n_delays x n_features.
+
+    Args:
+        wts: (n_chans, n_features x n_delays)
+
+    Returns:
+        wts_2d: (n_chans, n_delays, n_features)
+    """
+    n_chans = wts.shape[0]
+    n_delays = len(delays_used) + 6 if delay_edges_added else len(delays_used)
+    n_features = wts.shape[1]/n_delays
+    print(n_features)
+    if delay_edges_added:
+        wts_2d = wts.reshape(n_chans, n_delays, n_features)[:, 3:-3, :]
+    else:
+        wts_2d = wts.reshape(n_chans, n_delays, n_features)
+    return wts_2d
 
 __all__ = ['get_alphas', 'get_delays', 'run_cv_temporal_ridge_regression_model_fold', 'get_dstim', 
            'run_cv_temporal_ridge_regression_model', 'get_all_pred', 'run_ridge_regression']
