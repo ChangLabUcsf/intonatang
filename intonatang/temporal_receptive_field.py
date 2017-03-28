@@ -1,5 +1,21 @@
 """Code for fitting temporal receptive models using Ridge (L2 regularized) regression.
 
+Given two ndarrays, stim and resp, there are two ways to fit trfs in terms of the cross validation strategy.
+Both CV strategies split the data into three mutually exclusive sets, training, validation (ridge), and test.
+The regression weights are fit to the training data. The best ridge parameter is found by testing on the ridge
+set. The final model performance (correlation between actual and predicted response) is calculated from the
+test set. 
+
+The two strategies are:
+
+1. Simple KFold: run_cv_temporal_ridge_regression_model
+    The total samples of the data are split into a (K-1)/K train set, 1/2K ridge set, and 1/2K test set
+    K times.
+
+2. User-defined: run_cv_temporal_ridge_regression_model_fold
+    Use this function when you want to specify your own train, ridge, and test sets (e.g. I use this to
+    make sure training sets have TIMIT sentences with low-to-high pitch variability so that I don't end up
+    with a training set that is only low pitch variability or only high pitch variability)
 """
 
 from __future__ import division, print_function, absolute_import
