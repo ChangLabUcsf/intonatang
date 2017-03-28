@@ -650,20 +650,45 @@ def get_all_pred(wts, dstims):
     return all_pred
 
 def run_model(train_stim, train_resp, ridge_stim, ridge_resp, test_stim, test_resp, alphas):
-    dtype = np.single
-    covmat = np.array(np.dot(train_stim.astype(dtype).T, train_stim.astype(dtype)))
-    L, Q = np.linalg.eigh(covmat)
-    Usr = np.dot(Q.T, np.dot(train_stim.T, train_resp)) 
+    """
 
-    n_features = train_stim.shape[1]
-    n_chans = train_resp.shape[1]
+    For multiple regression with stim X and resp y and wts B:
+    XB = y
+    X'XB = X'y
+    B = (X'X)^-1 X'y
+
+    Add L2 (Ridge) regularization:
+    B = (X'X + aI)^-1 X'y
+
+    Because covariance X'X is a real symmetric matrix, we can decompose it to QLQ', where
+    Q is an orthogonal matrix with the eigenvectors and L is a diagonal matrix with the eigenvalues
+    of X'X. Furthermore, (QLQ')^-1 = QL^-1Q'
+
+    B = (QLQ' + aI)^-1 X'y
+    B = Q (L + aI)^-1 Q'X'y
+
+    Below, `covmat` is X'X
+    `l` contains the diagonal entries of L
+    `Q` is Q
+    `Usr` is Q'X'y
+    `D_inv` is (L + aI)^-1
+
+    The wts (B) can be calculated by the matrix multiplication of [Q, D_inv, Usr]
+    """
+    n_features = train_stim.shape[1] #stim shape is time x features
+    n_chans = train_resp.shape[1] #resp shape is time x channels
     n_alphas = alphas.shape[0]
 
     wts = np.zeros((n_alphas, n_features, n_chans))
     ridge_corrs = np.zeros((n_alphas, n_chans))
 
+    dtype = np.single
+    covmat = np.array(np.dot(train_stim.astype(dtype).T, train_stim.astype(dtype)))
+    l, Q = np.linalg.eigh(covmat)
+    Usr = np.dot(Q.T, np.dot(train_stim.T, train_resp))
+
     for alpha_i, alpha in enumerate(alphas):
-        D_inv = np.diag(1/(L+alpha)).astype(dtype)
+        D_inv = np.diag(1/(l+alpha)).astype(dtype)
         wt = np.array(reduce(np.dot, [Q, D_inv, Usr]).astype(dtype))
         pred = np.dot(ridge_stim, wt)
         ridge_corr = np.zeros((n_chans))
