@@ -9,12 +9,12 @@ import numpy as np
 import scipy.io as sio
 from scipy.stats import zscore
 import matplotlib.pyplot as plt
-import sklearn.model_selection as model_selection
 import pandas as pd
 import random
 
 from . import timit
 from .intonation_stims import get_pitch_and_intensity
+from .temporal_receptive_field import *
 
 def generate_all_results(regenerate_shuffled_timit_data=False):
     subject_numbers = [113, 118, 122, 123, 125, 129, 131]
@@ -48,9 +48,7 @@ def run_ptrf_analysis_pipeline_for_subject_number(subject_number, pitch_scaling=
     test_corr_all = np.zeros((n_chans, 25))
     test_corr_abs_bin = np.zeros((n_chans, 25))
     test_corr_rel_bin = np.zeros((n_chans, 25))
-    best_alphas_all = np.zeros((n_chans, 25))
-    best_alphas_abs_bin = np.zeros((n_chans, 25))
-    best_alphas_rel_bin = np.zeros((n_chans, 25))
+
     wts_all = np.zeros((n_chans, 1058, 25))
     wts_abs = np.zeros((n_chans, 598, 25))
     wts_rel = np.zeros((n_chans, 598, 25))
@@ -62,9 +60,9 @@ def run_ptrf_analysis_pipeline_for_subject_number(subject_number, pitch_scaling=
         stims_all, resps_all = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="all")
         stims_abs_bin, resps_abs_bin = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="abs_bin")
         stims_rel_bin, resps_rel_bin = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="rel_bin")
-        test_corr_all[:,i], wts_all[:, :, i], best_alphas_all[:,i] = run_cv_model_fold(stims_all, resps_all)
-        test_corr_abs_bin[:,i], wts_abs[:, :, i], best_alphas_abs_bin[:,i] = run_cv_model_fold(stims_abs_bin, resps_abs_bin)
-        test_corr_rel_bin[:,i], wts_rel[:, :, i], best_alphas_rel_bin[:,i] = run_cv_model_fold(stims_rel_bin, resps_rel_bin)
+        test_corr_all[:,i], wts_all[:, :, i] = run_cv_temporal_ridge_regression_model_fold(stims_all, resps_all)
+        test_corr_abs_bin[:,i], wts_abs[:, :, i] = run_cv_temporal_ridge_regression_model_fold(stims_abs_bin, resps_abs_bin)
+        test_corr_rel_bin[:,i], wts_rel[:, :, i] = run_cv_temporal_ridge_regression_model_fold(stims_rel_bin, resps_rel_bin)
 
     r2_abs_folds = test_corr_all ** 2 - test_corr_rel_bin ** 2
     r2_rel_folds = test_corr_all ** 2 - test_corr_abs_bin ** 2
@@ -84,9 +82,7 @@ def run_ptrf_analysis_pipeline_for_subject_number_testing_rel_versus_change(subj
     test_corr_all = np.zeros((n_chans, 25))
     test_corr_rel = np.zeros((n_chans, 25))
     test_corr_change = np.zeros((n_chans, 25))
-    best_alphas_all = np.zeros((n_chans, 25))
-    best_alphas_rel = np.zeros((n_chans, 25))
-    best_alphas_change = np.zeros((n_chans, 25))
+
     wts_all = np.zeros((n_chans, 1564, 25)) #1058 = 46 * 23
     wts_rel = np.zeros((n_chans, 1104, 25)) #598 = 46*13
     wts_change = np.zeros((n_chans, 1104, 25))
@@ -99,9 +95,9 @@ def run_ptrf_analysis_pipeline_for_subject_number_testing_rel_versus_change(subj
         stims_all, resps_all = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, abs_change_bin_edges=abs_change_bin_edges, feat="all_with_change")
         stims_rel, resps_rel = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, abs_change_bin_edges=abs_change_bin_edges, feat="abs_rel")
         stims_change, resps_change = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, abs_change_bin_edges=abs_change_bin_edges, feat="abs_change")
-        test_corr_all[:,i], wts_all[:, :, i], best_alphas_all[:,i] = run_cv_model_fold(stims_all, resps_all)
-        test_corr_rel[:,i], wts_rel[:, :, i], best_alphas_rel[:,i] = run_cv_model_fold(stims_rel, resps_rel)
-        test_corr_change[:,i], wts_change[:, :, i], best_alphas_change[:,i] = run_cv_model_fold(stims_change, resps_change)
+        test_corr_all[:,i], wts_all[:, :, i] = run_cv_temporal_ridge_regression_model_fold(stims_all, resps_all)
+        test_corr_rel[:,i], wts_rel[:, :, i] = run_cv_temporal_ridge_regression_model_fold(stims_rel, resps_rel)
+        test_corr_change[:,i], wts_change[:, :, i] = run_cv_temporal_ridge_regression_model_fold(stims_change, resps_change)
 
     r2_rel_folds = test_corr_all ** 2 - test_corr_change ** 2
     r2_change_folds = test_corr_all ** 2 - test_corr_rel ** 2
@@ -137,9 +133,9 @@ def run_ptrf_analysis_permutation_test(subject_number, pitch_scaling="log"):
             stims_all, resps_all = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="all")
             stims_abs_bin, resps_abs_bin = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="abs_bin")
             stims_rel_bin, resps_rel_bin = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="rel_bin")
-            test_corr_all[:,i], wts, _ = run_cv_model_fold(stims_all, resps_all)
-            test_corr_abs_bin[:,i], wts, _ = run_cv_model_fold(stims_abs_bin, resps_abs_bin)
-            test_corr_rel_bin[:,i], wts, _ = run_cv_model_fold(stims_rel_bin, resps_rel_bin)
+            test_corr_all[:,i], wts = run_cv_temporal_ridge_regression_model_fold(stims_all, resps_all)
+            test_corr_abs_bin[:,i], wts = run_cv_temporal_ridge_regression_model_fold(stims_abs_bin, resps_abs_bin)
+            test_corr_rel_bin[:,i], wts = run_cv_temporal_ridge_regression_model_fold(stims_rel_bin, resps_rel_bin)
         
         r2_abs_folds = test_corr_all ** 2 - test_corr_rel_bin ** 2
         r2_rel_folds = test_corr_all ** 2 - test_corr_abs_bin ** 2
@@ -353,29 +349,6 @@ def get_pitch_matrix(pitch, bin_edges):
             stim_pitch[i, b] = 1
     return stim_pitch
 
-def get_alphas(start=2, stop=7, num=10):
-    """Returns alphas from num^start to num^stop in log space.
-    """
-    return np.logspace(start, stop, num)
-
-def get_delays(delay_seconds=0.4, fs=100):
-    """Returns 1d array of delays for a given window (in s). Default sampling frequency (fs) is 100Hz.
-    """
-    return np.arange(np.floor(delay_seconds * fs), dtype=int)
-
-def run_cv_model_fold(stims, resps, delays=get_delays(), alphas=get_alphas()):
-    dstims = [get_dstim(stim, delays) for stim in stims]
-    n_chans = resps[0].shape[1]
-
-    wts_alphas, ridge_corrs_alphas = run_ridge_regression(dstims[0], resps[0], dstims[1], resps[1], alphas)
-    best_alphas = ridge_corrs_alphas.argmax(0) #returns array with length nchans.
-    best_wts = [wts_alphas[best_alphas[chan], :, chan] for chan in range(n_chans)]
-    test_pred = [np.dot(dstims[2], best_wts[chan]) for chan in range(n_chans)]
-    test_corr = np.array([np.corrcoef(test_pred[chan], resps[2][:, chan])[0,1] for chan in range(n_chans)])
-
-    test_corr[np.isnan(test_corr)] = 0
-    return test_corr, np.array(best_wts), np.array(best_alphas)
-
 def save_cv_model_fold(subject_number, test_corr_all, test_corr_abs_bin, test_corr_rel_bin, r2_abs, r2_rel, wts_all, wts_abs, wts_rel, pitch_scaling="log", note=""):
     filename = 'EC' + str(subject_number) + '_25fold_ptrf_results_10bins' + note
     if pitch_scaling != "log":
@@ -556,144 +529,6 @@ def randomize_timit_pitch_contours(timit_pitch, save_as=None):
         timit_pitch.to_hdf(filename, 'timit_pitch_shuffle_' + str(save_as))
 
     return timit_pitch
-
-def get_dstim(stim, delays=get_delays(0.6, 100), add_edges=True):
-    nt, ndim = stim.shape
-    if add_edges:
-        step = delays[1] - delays[0]
-        delays_beg = [delays[0]-3*step, delays[0]-2*step, delays[0]-step]
-        delays_end = [delays[-1]+step, delays[-1]+2*step, delays[-1]+3*step]
-        delays = np.concatenate([delays_beg, delays, delays_end])
-    dstims = []
-    for i, d in enumerate(delays):
-        dstim = np.zeros((nt, ndim))
-        if d<0:
-            dstim[:d, :] = stim[-d:, :]
-        elif d>0:
-            dstim[d:, :] = stim[:-d, :]
-        else:
-            dstim = stim.copy()
-        dstims.append(dstim)
-
-    dstims = np.hstack(dstims)
-
-    return dstims
-
-def run_cv_temporal_ridge_regression_model(stim, resp, delays=get_delays(), alphas=get_alphas()):
-    dstims = get_dstim(stim, delays)
-    test_corr_folds, wts_folds, best_alphas = get_kfold_regression_results_for_best_alphas(dstims, resp, alphas)
-    return test_corr_folds, wts_folds, best_alphas
-
-def get_kfold_regression_results_for_best_alphas(dstims, resp, alphas, n_folds=5):
-    n_features = dstims.shape[1]
-    n_chans = resp.shape[1]
-
-    test_corr_folds = np.zeros((n_folds, n_chans))
-    wts_folds = np.zeros((n_folds, n_features, n_chans))
-    best_alphas = np.zeros((n_folds, n_chans))
-
-    kf = model_selection.KFold(n_splits=n_folds)
-
-    for i, (train, test) in enumerate(kf.split(dstims)):
-        print('Running fold ' + str(i) + ".", end=" ")
-
-        train_stim = dstims[train, :]
-        train_resp = resp[train, :]
-
-        #Use half of the test set returned by KFold for validation and half for test.
-        ridge_stim = dstims[test[:round(len(test)/2)], :]
-        ridge_resp = resp[test[:round(len(test)/2)], :]
-        test_stim = dstims[test[round(len(test)/2):], :]
-        test_resp = resp[test[round(len(test)/2):], :]
-
-        wts_alphas, ridge_corrs = run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
-        best_alphas[i, :] = ridge_corrs.argmax(0) #returns array with length nchans. 
-
-        #For each chan, see which alpha did the best on the validation and choose the wts for that alpha
-        best_wts = [wts_alphas[best_alphas[i, chan], :, chan] for chan in range(n_chans)]
-        test_pred = [np.dot(test_stim, best_wts[chan]) for chan in range(n_chans)]
-        test_corr = np.array([np.corrcoef(test_pred[chan], test_resp[:, chan])[0,1] for chan in range(resp.shape[1])])
-        test_corr[np.isnan(test_corr)] = 0
-
-        test_corr_folds[i, :] = test_corr
-        wts_folds[i, :, :] = np.array(best_wts).T
-
-    return test_corr_folds, wts_folds, best_alphas
-
-def get_all_pred(wts, dstims):
-    all_pred = np.array([np.dot(dstims, wts[chan]) for chan in range(wts.shape[0])])
-    return all_pred
-
-def run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas):
-    """Runs ridge (L2 regularized) regression for ridge parameters in alphas and returns wts fit
-    on training data and correlation between actual and predicted on validation data for each alpha.
-
-    Args:
-        train_stim: (n_training_samples x n_features)
-        train_resp: (n_training_samples x n_chans)
-        ridge_stim: (n_validation_samples x n_features)
-        ridge_resp: (n_validation_samples x n_chans)
-        alphas: 1d array with ridge parameters to use
-
-    Returns:
-        (tuple):
-            * **wts** (*ndarray*): Computed regression weights. Shape of wts is 
-                (n_alphas, n_features, n_chans)
-            * **ridge_corrs** (*ndarray*): Correlation between predicted and actual responses on
-                ridge validation set. Shape of ridge_corrs is (n_alphas, n_chans)
-
-    For multiple regression with stim X and resp y and wts B:
-
-    1. XB = y
-    2. X'XB = X'y
-    3. B = (X'X)^-1 X'y
-
-    Add L2 (Ridge) regularization:
-
-    4. B = (X'X + aI)^-1 X'y
-
-    Because covariance X'X is a real symmetric matrix, we can decompose it to QLQ', where
-    Q is an orthogonal matrix with the eigenvectors and L is a diagonal matrix with the eigenvalues
-    of X'X. Furthermore, (QLQ')^-1 = QL^-1Q'
-
-    5. B = (QLQ' + aI)^-1 X'y
-    6. B = Q (L + aI)^-1 Q'X'y
-
-    Variables in code below:
-
-    * `covmat` is X'X
-    * `l` contains the diagonal entries of L
-    * `Q` is Q
-    * `Usr` is Q'X'y
-    * `D_inv` is (L + aI)^-1
-
-    The wts (B) can be calculated by the matrix multiplication of [Q, D_inv, Usr]
-    """
-    n_features = train_stim.shape[1] #stim shape is time x features
-    n_chans = train_resp.shape[1] #resp shape is time x channels
-    n_alphas = alphas.shape[0]
-
-    wts = np.zeros((n_alphas, n_features, n_chans))
-    ridge_corrs = np.zeros((n_alphas, n_chans))
-
-    dtype = np.single
-    covmat = np.array(np.dot(train_stim.astype(dtype).T, train_stim.astype(dtype)))
-    l, Q = np.linalg.eigh(covmat)
-    Usr = np.dot(Q.T, np.dot(train_stim.T, train_resp))
-
-    for alpha_i, alpha in enumerate(alphas):
-        D_inv = np.diag(1/(l+alpha)).astype(dtype)
-        wt = np.array(reduce(np.dot, [Q, D_inv, Usr]).astype(dtype))
-        pred = np.dot(ridge_stim, wt)
-        ridge_corr = np.zeros((n_chans))
-        for i in range(ridge_resp.shape[1]):
-            ridge_corr[i] = np.corrcoef(ridge_resp[:, i], pred[:, i])[0, 1]
-        ridge_corr[np.isnan(ridge_corr)] = 0
-
-        ridge_corrs[alpha_i, :] = ridge_corr
-        wts[alpha_i, :, :] = wt
-
-    return wts, ridge_corrs
 
 def plot_prediction_overlay(test_corr, resp, all_pred, pitch_intensity, chans=[], start_time=5000):
     chans = np.array(chans)
