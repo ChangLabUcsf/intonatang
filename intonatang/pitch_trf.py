@@ -354,12 +354,12 @@ def get_pitch_matrix(pitch, bin_edges):
     return stim_pitch
 
 def get_alphas(start=2, stop=7, num=10):
-    """Returns alphas from 10^start to 10^stop
+    """Returns alphas from num^start to num^stop in log space.
     """
     return np.logspace(start, stop, num)
 
 def get_delays(delay_seconds=0.4, fs=100):
-    """Returns 1d array of delays for a given window (in s)
+    """Returns 1d array of delays for a given window (in s). Default sampling frequency (fs) is 100Hz.
     """
     return np.arange(np.floor(delay_seconds * fs), dtype=int)
 
@@ -368,7 +368,7 @@ def run_cv_model_fold(stims, resps, delays=get_delays(), alphas=get_alphas()):
     n_chans = resps[0].shape[1]
 
     wts_alphas, ridge_corrs_alphas = run_ridge_regression(dstims[0], resps[0], dstims[1], resps[1], alphas)
-    best_alphas = ridge_corrs_alphas.argmax(0) #returns array with length nchans. 
+    best_alphas = ridge_corrs_alphas.argmax(0) #returns array with length nchans.
     best_wts = [wts_alphas[best_alphas[chan], :, chan] for chan in range(n_chans)]
     test_pred = [np.dot(dstims[2], best_wts[chan]) for chan in range(n_chans)]
     test_corr = np.array([np.corrcoef(test_pred[chan], resps[2][:, chan])[0,1] for chan in range(n_chans)])
@@ -579,71 +579,46 @@ def get_dstim(stim, delays=get_delays(0.6, 100), add_edges=True):
 
     return dstims
 
-def run_cv_model(stim, resp, delays=get_delays(0.6, 100)):
+def run_cv_temporal_ridge_regression_model(stim, resp, delays=get_delays(), alphas=get_alphas()):
     dstims = get_dstim(stim, delays)
-    alphas = get_alphas(2, 7, 10)
-    test_corr_folds, wts_folds, best_alphas = get_best_alphas(dstims, resp, alphas)
+    test_corr_folds, wts_folds, best_alphas = get_kfold_regression_results_for_best_alphas(dstims, resp, alphas)
     return test_corr_folds, wts_folds, best_alphas
 
-def get_best_alphas_loocv(dstims, resp, indexes, alphas):
-    test_corr_folds = []
-    wts_folds = []
-    best_alphas = []
+def get_kfold_regression_results_for_best_alphas(dstims, resp, alphas, n_folds=5):
+    n_features = dstims.shape[1]
+    n_chans = resp.shape[1]
 
-    for current, next in zip(indexes, indexes[1:]):
-        train_stim = np.concatenate([dstims[0:current], dstims[next:]])
-        train_resp = np.concatenate([resp[0:current], resp[next:]])
-        ridge_stim = train_stim
-        ridge_resp = train_resp
-        test_stim = dstims[current:next]
-        test_resp = resp[current:next]
-        wts_alphas, ridge_corrs = run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
-        best_alphas_indiv = ridge_corrs.argmax(0) #returns array with length nchans. 
-        best_alphas.append(best_alphas_indiv)
+    test_corr_folds = np.zeros((n_folds, n_chans))
+    wts_folds = np.zeros((n_folds, n_features, n_chans))
+    best_alphas = np.zeros((n_folds, n_chans))
 
-        best_wts = [wts_alphas[best_alphas_indiv[chan], :, chan] for chan in range(resp.shape[1])]
-        test_pred = [np.dot(test_stim, best_wts[chan]) for chan in range(resp.shape[1])]
-        test_corr = np.array([np.corrcoef(test_pred[chan], test_resp[:, chan])[0,1] for chan in range(resp.shape[1])])
+    kf = model_selection.KFold(n_splits=n_folds)
 
-        test_corr[np.isnan(test_corr)] = 0
-
-        test_corr_folds.append(test_corr)
-        wts_folds.append(np.array(best_wts))
-
-    return np.array(test_corr_folds), np.array(wts_folds), np.array(best_alphas)
-
-def get_best_alphas(dstims, resp, alphas):
-    nt = len(dstims)
-    kf = model_selection.KFold(nt, n_folds=5)
-
-    test_corr_folds = []
-    wts_folds = []
-    best_alphas = []
-
-    for train, test in kf:
-        print('Running fold.', end=" ")
+    for i, (train, test) in enumerate(kf.split(dstims)):
+        print('Running fold ' + str(i) + ".", end=" ")
 
         train_stim = dstims[train, :]
         train_resp = resp[train, :]
+
+        #Use half of the test set returned by KFold for validation and half for test.
         ridge_stim = dstims[test[:round(len(test)/2)], :]
         ridge_resp = resp[test[:round(len(test)/2)], :]
         test_stim = dstims[test[round(len(test)/2):], :]
         test_resp = resp[test[round(len(test)/2):], :]
 
         wts_alphas, ridge_corrs = run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
-        best_alphas_indiv = ridge_corrs.argmax(0) #returns array with length nchans. 
-        best_alphas.append(best_alphas_indiv)
+        best_alphas[i, :] = ridge_corrs.argmax(0) #returns array with length nchans. 
 
-        best_wts = [wts_alphas[best_alphas_indiv[chan], :, chan] for chan in range(resp.shape[1])]
-        test_pred = [np.dot(test_stim, best_wts[chan]) for chan in range(resp.shape[1])]
+        #For each chan, see which alpha did the best on the validation and choose the wts for that alpha
+        best_wts = [wts_alphas[best_alphas[i, chan], :, chan] for chan in range(n_chans)]
+        test_pred = [np.dot(test_stim, best_wts[chan]) for chan in range(n_chans)]
         test_corr = np.array([np.corrcoef(test_pred[chan], test_resp[:, chan])[0,1] for chan in range(resp.shape[1])])
-
         test_corr[np.isnan(test_corr)] = 0
 
-        test_corr_folds.append(test_corr)
-        wts_folds.append(np.array(best_wts))
+        test_corr_folds[i, :] = test_corr
+        wts_folds[i, :, :] = np.array(best_wts).T
 
-    return np.array(test_corr_folds), np.array(wts_folds), np.array(best_alphas)
+    return test_corr_folds, wts_folds, best_alphas
 
 def get_all_pred(wts, dstims):
     all_pred = np.array([np.dot(dstims, wts[chan]) for chan in range(wts.shape[0])])
