@@ -67,10 +67,24 @@ def get_blocks_for_subject_number(subject_number, control_stim=False, missing_f0
     elif subject_number == 137:
         if control_stim:
             blocks = []
-        if missing_f0_stim:
+        elif missing_f0_stim:
             blocks = [9, 11]
         else:
             blocks = [7, 10]
+    elif subject_number == 142:
+        if control_stim:
+            blocks = []
+        elif missing_f0_stim:
+            blocks = [38, 40]
+        else:
+            blocks = [36, 37]
+    elif subject_number == 143:
+        if control_stim:
+            blocks = []
+        elif missing_f0_stim:
+            blocks = [10, 12, 14]
+        else:
+            blocks = [9, 11, 13]
 
     return blocks
 
@@ -139,7 +153,21 @@ def get_stims_for_subject_number(subject_number, control_stim=False, missing_f0_
         if control_stim:
             stims_list = []
         elif missing_f0_stim:
-            stims_list = [missing_f0_stims1, missing_f0_stims2, missing_f0_stims3, missing_f0_stims4]
+            stims_list = [missing_f0_stims1, missing_f0_stims2]
+        else:
+            stims_list = [stims1, stims2]
+    elif subject_number == 142:
+        if control_stim:
+            stims_list = []
+        elif missing_f0_stim:
+            stims_list = [missing_f0_stims1, missing_f0_stims2]
+        else:
+            stims_list = [stims1, stims2]
+    elif subject_number == 143:
+        if control_stim:
+            stims_list = []
+        elif missing_f0_stim:
+            stims_list = [missing_f0_stims1, missing_f0_stims2, missing_f0_stims4]
         else:
             stims_list = [stims1, stims2, stims3]
 
