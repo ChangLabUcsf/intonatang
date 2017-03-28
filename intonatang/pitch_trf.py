@@ -367,7 +367,7 @@ def run_cv_model_fold(stims, resps, delays=get_delays(), alphas=get_alphas()):
     dstims = [get_dstim(stim, delays) for stim in stims]
     n_chans = resps[0].shape[1]
 
-    wts_alphas, ridge_corrs_alphas = run_model(dstims[0], resps[0], dstims[1], resps[1], alphas)
+    wts_alphas, ridge_corrs_alphas = run_ridge_regression(dstims[0], resps[0], dstims[1], resps[1], alphas)
     best_alphas = ridge_corrs_alphas.argmax(0) #returns array with length nchans. 
     best_wts = [wts_alphas[best_alphas[chan], :, chan] for chan in range(n_chans)]
     test_pred = [np.dot(dstims[2], best_wts[chan]) for chan in range(n_chans)]
@@ -597,7 +597,7 @@ def get_best_alphas_loocv(dstims, resp, indexes, alphas):
         ridge_resp = train_resp
         test_stim = dstims[current:next]
         test_resp = resp[current:next]
-        wts_alphas, ridge_corrs = run_model(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
+        wts_alphas, ridge_corrs = run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
         best_alphas_indiv = ridge_corrs.argmax(0) #returns array with length nchans. 
         best_alphas.append(best_alphas_indiv)
 
@@ -630,7 +630,7 @@ def get_best_alphas(dstims, resp, alphas):
         test_stim = dstims[test[round(len(test)/2):], :]
         test_resp = resp[test[round(len(test)/2):], :]
 
-        wts_alphas, ridge_corrs = run_model(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
+        wts_alphas, ridge_corrs = run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
         best_alphas_indiv = ridge_corrs.argmax(0) #returns array with length nchans. 
         best_alphas.append(best_alphas_indiv)
 
@@ -649,29 +649,48 @@ def get_all_pred(wts, dstims):
     all_pred = np.array([np.dot(dstims, wts[chan]) for chan in range(wts.shape[0])])
     return all_pred
 
-def run_model(train_stim, train_resp, ridge_stim, ridge_resp, alphas):
-    """
+def run_ridge_regression(train_stim, train_resp, ridge_stim, ridge_resp, alphas):
+    """Runs ridge (L2 regularized) regression for ridge parameters in alphas and returns wts fit
+    on training data and correlation between actual and predicted on validation data for each alpha.
+
+    Args:
+        train_stim: (n_training_samples x n_features)
+        train_resp: (n_training_samples x n_chans)
+        ridge_stim: (n_validation_samples x n_features)
+        ridge_resp: (n_validation_samples x n_chans)
+        alphas: 1d array with ridge parameters to use
+
+    Returns:
+        (tuple):
+            * **wts** (*ndarray*): Computed regression weights. Shape of wts is 
+                (n_alphas, n_features, n_chans)
+            * **ridge_corrs** (*ndarray*): Correlation between predicted and actual responses on
+                ridge validation set. Shape of ridge_corrs is (n_alphas, n_chans)
 
     For multiple regression with stim X and resp y and wts B:
-    XB = y
-    X'XB = X'y
-    B = (X'X)^-1 X'y
+
+    1. XB = y
+    2. X'XB = X'y
+    3. B = (X'X)^-1 X'y
 
     Add L2 (Ridge) regularization:
-    B = (X'X + aI)^-1 X'y
+
+    4. B = (X'X + aI)^-1 X'y
 
     Because covariance X'X is a real symmetric matrix, we can decompose it to QLQ', where
     Q is an orthogonal matrix with the eigenvectors and L is a diagonal matrix with the eigenvalues
     of X'X. Furthermore, (QLQ')^-1 = QL^-1Q'
 
-    B = (QLQ' + aI)^-1 X'y
-    B = Q (L + aI)^-1 Q'X'y
+    5. B = (QLQ' + aI)^-1 X'y
+    6. B = Q (L + aI)^-1 Q'X'y
 
-    Below, `covmat` is X'X
-    `l` contains the diagonal entries of L
-    `Q` is Q
-    `Usr` is Q'X'y
-    `D_inv` is (L + aI)^-1
+    Variables in code below:
+
+    * `covmat` is X'X
+    * `l` contains the diagonal entries of L
+    * `Q` is Q
+    * `Usr` is Q'X'y
+    * `D_inv` is (L + aI)^-1
 
     The wts (B) can be calculated by the matrix multiplication of [Q, D_inv, Usr]
     """
