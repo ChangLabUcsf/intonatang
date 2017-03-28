@@ -367,7 +367,7 @@ def run_cv_model_fold(stims, resps, delays=get_delays(), alphas=get_alphas()):
     dstims = [get_dstim(stim, delays) for stim in stims]
     n_chans = resps[0].shape[1]
 
-    wts_alphas, ridge_corrs_alphas = run_model(dstims[0], resps[0], dstims[1], resps[1], dstims[2], resps[2], alphas)
+    wts_alphas, ridge_corrs_alphas = run_model(dstims[0], resps[0], dstims[1], resps[1], alphas)
     best_alphas = ridge_corrs_alphas.argmax(0) #returns array with length nchans. 
     best_wts = [wts_alphas[best_alphas[chan], :, chan] for chan in range(n_chans)]
     test_pred = [np.dot(dstims[2], best_wts[chan]) for chan in range(n_chans)]
@@ -597,7 +597,7 @@ def get_best_alphas_loocv(dstims, resp, indexes, alphas):
         ridge_resp = train_resp
         test_stim = dstims[current:next]
         test_resp = resp[current:next]
-        wts_alphas, ridge_corrs = run_model(train_stim, train_resp, ridge_stim, ridge_resp, test_stim, test_resp, alphas)
+        wts_alphas, ridge_corrs = run_model(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
         best_alphas_indiv = ridge_corrs.argmax(0) #returns array with length nchans. 
         best_alphas.append(best_alphas_indiv)
 
@@ -630,7 +630,7 @@ def get_best_alphas(dstims, resp, alphas):
         test_stim = dstims[test[round(len(test)/2):], :]
         test_resp = resp[test[round(len(test)/2):], :]
 
-        wts_alphas, ridge_corrs = run_model(train_stim, train_resp, ridge_stim, ridge_resp, test_stim, test_resp, alphas)
+        wts_alphas, ridge_corrs = run_model(train_stim, train_resp, ridge_stim, ridge_resp, alphas)
         best_alphas_indiv = ridge_corrs.argmax(0) #returns array with length nchans. 
         best_alphas.append(best_alphas_indiv)
 
@@ -649,7 +649,7 @@ def get_all_pred(wts, dstims):
     all_pred = np.array([np.dot(dstims, wts[chan]) for chan in range(wts.shape[0])])
     return all_pred
 
-def run_model(train_stim, train_resp, ridge_stim, ridge_resp, test_stim, test_resp, alphas):
+def run_model(train_stim, train_resp, ridge_stim, ridge_resp, alphas):
     """
 
     For multiple regression with stim X and resp y and wts B:
