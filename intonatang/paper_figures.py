@@ -430,6 +430,7 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
     _ = ax1.pie(pie_means, **pie_kws)
     ax1.set_frame_on(False)
     ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks)
+    ax1.set(title='Intonation \n n=' + str(np.sum(df.cat==1)))
 
     # Sentence electrodes
     df3 = df2[df2["cat"] == 0]
@@ -444,6 +445,7 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
     _ = ax1.pie(pie_means, **pie_kws)
     ax1.set_frame_on(False)
     ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
+    ax1.set(title='Sentence \n n=' + str(np.sum(df.cat==0)))
 
     # Speaker electrodes
     df3 = df2[df2["cat"] == 2]
@@ -458,6 +460,7 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
     patches, texts = ax1.pie(pie_means, **pie_kws)
     ax1.set_frame_on(False)
     ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
+    ax1.set(title='Speaker \n n=' + str(np.sum(df.cat==2)))
 
     for ax in axs:
         seaborn.despine(ax=ax)
