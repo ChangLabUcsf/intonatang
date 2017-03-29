@@ -68,7 +68,7 @@ def generate_all_results():
 
 def load_all_data(subject_numbers=None):
     if subject_numbers is None:
-        subject_numbers = [113, 118, 122, 123, 125, 129, 131]
+        subject_numbers = [113, 118, 122, 123, 125, 129, 131, 137, 142, 143]
     datas = []
     cats = []
     r_means = []
