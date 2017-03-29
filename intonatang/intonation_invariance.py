@@ -103,7 +103,7 @@ def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=
 
     return accs, accs_test
 
-def save_control_test_accs(subject_number, accs, accs_test, diagonal=True):
+def save_control_test_accs(subject_number, accs, accs_test, diagonal=True, missing_f0=False):
     """Used to save the nonspeech control invariance analysis results. 
 
     After running ``test_invariance_control``, save ``accs`` and ``accs_test`` for a subject.
@@ -115,14 +115,17 @@ def save_control_test_accs(subject_number, accs, accs_test, diagonal=True):
         accs_test (ndarray): shape is (n_chans). Contains accuracy value for nonspeech data. 
     
         diagonal (bool): whether the invariance analysis used a shrinkage of 1 and was diagonal LDA.
+        missing_f0 (bool): missing f0 invariance analysis
     """
     info_str = ""
+    if missing_f0:
+        info_str = info_str + "_missing_f0"
     if diagonal:
         info_str = info_str + "_diagonal"
     filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
     sio.savemat(filename, {'accs': accs, 'accs_test': accs_test})
 
-def load_control_test_accs(subject_number, diagonal=True):
+def load_control_test_accs(subject_number, diagonal=True, missing_f0=False):
     """Used to load nonspeech control invariance analysis results.
 
     Args:
@@ -136,6 +139,8 @@ def load_control_test_accs(subject_number, diagonal=True):
             * **accs_test** (*ndarray*): shape is (n_chans). Contains accuracy value for nonspeech data. 
     """
     info_str = ""
+    if missing_f0:
+        info_str = info_str + "_missing_f0"
     if diagonal:
         info_str = info_str + "_diagonal"
     filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
