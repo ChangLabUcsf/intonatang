@@ -353,7 +353,7 @@ def plot_pie_chart_for_subject_number(subject_number, use_r2=True, alpha=None, o
                   center=[img.shape[1]-120+(i*30), img.shape[0]-20], frame=True, wedgeprops={'linewidth':0})
     return fig, ax, stat_sums
 
-pie_chart_radius_by_subject_number = {113: 10, 118: 14, 122: 11, 123: 11, 125: 11, 129: 12, 131:10}
+pie_chart_radius_by_subject_number = {113: 10, 118: 14, 122: 11, 123: 11, 125: 11, 129: 12, 131:10, 137: 12, 142: 11, 143: 11}
 
 def get_brain_img_and_xy_for_subject_number(subject_number):
     subject = 'EC' + str(subject_number)

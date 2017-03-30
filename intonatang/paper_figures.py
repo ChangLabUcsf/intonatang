@@ -490,7 +490,7 @@ def brain_inset(axs, subject_number):
                   center=[inset_xlim[1]-60+((i**(5/4))*1.4*pie_chart_radius_by_subject_number[subject_number]), inset_ylim[0]+20], frame=True, wedgeprops={'linewidth':0})
     return patches
 
-pie_chart_radius_by_subject_number = {113: 10, 118: 14, 122: 11, 123: 11, 125: 11, 129: 12, 131:10}
+pie_chart_radius_by_subject_number = {113: 10, 118: 14, 122: 11, 123: 11, 125: 11, 129: 12, 131:10, 137: 12, 142: 11, 143: 11}
 
 def get_brain_inset_info(subject_number):
     if subject_number == 113:
@@ -514,36 +514,43 @@ def get_brain_inset_info(subject_number):
     elif subject_number == 131:
         inset_xlim = (350, 620)
         inset_ylim = (460, 280)
+    elif subject_number == 137:
+        inset_xlim = (383, 707)
+        inset_ylim = (488, 272)
+    elif subject_number == 142:
+        inset_xlim = (350, 648)
+        inset_ylim = (460, 262)
+    elif subject_number == 143:
+        inset_xlim = (391.5, 688.5)
+        inset_ylim = (484, 286)
     return inset_xlim, inset_ylim
 
 def sfig1():
-    fig = plt.figure(figsize=(6, 8))
+    fig = plt.figure(figsize=(6, 10))
 
-    gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 1])
-    gs_brains = matplotlib.gridspec.GridSpecFromSubplotSpec(4, 4, subplot_spec=gs[0], width_ratios=[0.7, 1, 0.7, 1], hspace=0.1)
+    gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 0.7])
+    gs_brains = matplotlib.gridspec.GridSpecFromSubplotSpec(5, 4, subplot_spec=gs[0], width_ratios=[0.7, 1, 0.7, 1], hspace=0.1)
     gs_boxplots = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], wspace=0.3)
     gs_left = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs_boxplots[0])
     gs_right = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs_boxplots[1])
 
-    ax_brain = plt.subplot(gs_brains[0, 0])
-    ax_inset = plt.subplot(gs_brains[0, 1])
-    brain_inset([ax_brain, ax_inset], 113)
-    for i, subject_number in enumerate([118, 123, 125]):
-        ax_brain = plt.subplot(gs_brains[i+1, 0])
-        ax_inset = plt.subplot(gs_brains[i+1, 1])
+
+    for i, subject_number in enumerate([113, 122, 131, 125, 137]):
+        ax_brain = plt.subplot(gs_brains[i, 0])
+        ax_inset = plt.subplot(gs_brains[i, 1])
         brain_inset([ax_brain, ax_inset], subject_number)
-    for i, subject_number in enumerate([122, 131, 129]):
-        ax_brain = plt.subplot(gs_brains[i+1, 2])
-        ax_inset = plt.subplot(gs_brains[i+1, 3])
+    for i, subject_number in enumerate([118, 123, 143, 129, 142]):
+        ax_brain = plt.subplot(gs_brains[i, 2])
+        ax_inset = plt.subplot(gs_brains[i, 3])
         patches = brain_inset([ax_brain, ax_inset], subject_number)
 
     ax = plt.subplot(gs_brains[0, 3])
     patches = [patches[i] for i in [1, 0, 2, 3]]
-    plt.legend(patches, ['Intonation', 'Sentence', 'Speaker', 'All interactions'], loc=2, bbox_to_anchor=(0, 1.1))
-    ax.set_frame_on(False)
+    plt.legend(patches, ['Intonation', 'Sentence', 'Speaker', 'All interactions'], loc=2, bbox_to_anchor=(1, 1.1))
     ax.set(xticks=[], yticks=[])
 
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([113, 118, 122, 123, 131])
+    # Left hemisphere subjects
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([113, 118, 122, 123, 131, 143])
     ax1 = plt.subplot(gs_left[0])
     ax2 = plt.subplot(gs_left[1])
     ax3 = plt.subplot(gs_left[2])
@@ -557,7 +564,8 @@ def sfig1():
     df = df[['st', 'sn', 'sp', 'sn st', 'st sp', 'sn sp', 'sn st sp', 'cat']]
     axs, patches = add_encoding_boxplots_to_axs(axs1, df)
 
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([125, 129])
+    # Right hemisphere subjects
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([125, 129, 137, 142])
     ax1 = plt.subplot(gs_right[0])
     ax2 = plt.subplot(gs_right[1])
     ax3 = plt.subplot(gs_right[2])
