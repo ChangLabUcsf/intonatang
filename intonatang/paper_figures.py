@@ -418,49 +418,52 @@ def add_encoding_boxplots_to_axs(axs, df, ylim=(-0.05, 1), yticks=[0, 0.2, 0.4, 
 
     # Intonation electrodes
     df3 = df2[df2["cat"] == 1]
-    ax = seaborn.boxplot(data=df3, ax=axs[0], **boxplot_kws)
-    ax.set(xlabel="")
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
-    pie_means = df[df['cat'] == 1].mean() * 100
-    pie_means[pie_means < 0] = 0 
-    pie_means = pie_means.values[:-1]
-    pie_means = np.concatenate([pie_means[0:3], [np.sum(pie_means[4:])]], axis=0)
-    ax1 = ax.twiny()
-    ax1.axis("equal")
-    _ = ax1.pie(pie_means, **pie_kws)
-    ax1.set_frame_on(False)
-    ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks)
-    ax1.set(title='Intonation \n n=' + str(np.sum(df.cat==1)))
+    if len(df3) > 0:
+        ax = seaborn.boxplot(data=df3, ax=axs[0], **boxplot_kws)
+        ax.set(xlabel="")
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+        pie_means = df[df['cat'] == 1].mean() * 100
+        pie_means[pie_means < 0] = 0 
+        pie_means = pie_means.values[:-1]
+        pie_means = np.concatenate([pie_means[0:3], [np.sum(pie_means[4:])]], axis=0)
+        ax1 = ax.twiny()
+        ax1.axis("equal")
+        patches, texts = ax1.pie(pie_means, **pie_kws)
+        ax1.set_frame_on(False)
+        ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks)
+        ax1.set(title='Intonation \n n=' + str(np.sum(df.cat==1)))
 
     # Sentence electrodes
     df3 = df2[df2["cat"] == 0]
-    ax = seaborn.boxplot(data=df3, ax=axs[1], **boxplot_kws)
-    ax.set(xticklabels=[], ylabel="")
-    pie_means = df[df['cat'] == 0].mean() * 100
-    pie_means[pie_means < 0] = 0
-    pie_means = pie_means.values[:-1]
-    pie_means = np.concatenate([pie_means[0:3], [np.sum(pie_means[4:])]], axis=0)
-    ax1 = ax.twiny()
-    ax1.axis("equal")
-    _ = ax1.pie(pie_means, **pie_kws)
-    ax1.set_frame_on(False)
-    ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
-    ax1.set(title='Sentence \n n=' + str(np.sum(df.cat==0)))
+    if len(df3) > 0:
+        ax = seaborn.boxplot(data=df3, ax=axs[1], **boxplot_kws)
+        ax.set(xticklabels=[], ylabel="")
+        pie_means = df[df['cat'] == 0].mean() * 100
+        pie_means[pie_means < 0] = 0
+        pie_means = pie_means.values[:-1]
+        pie_means = np.concatenate([pie_means[0:3], [np.sum(pie_means[4:])]], axis=0)
+        ax1 = ax.twiny()
+        ax1.axis("equal")
+        patches, texts = ax1.pie(pie_means, **pie_kws)
+        ax1.set_frame_on(False)
+        ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
+        ax1.set(title='Sentence \n n=' + str(np.sum(df.cat==0)))
 
     # Speaker electrodes
     df3 = df2[df2["cat"] == 2]
-    ax = seaborn.boxplot(data=df3, ax=axs[2], **boxplot_kws)
-    ax.set(xticklabels=[], xlabel="", ylabel="")
-    pie_means = df[df['cat'] == 2].mean() * 100
-    pie_means[pie_means < 0] = 0 
-    pie_means = pie_means.values[:-1]
-    pie_means = np.concatenate([pie_means[0:3], [np.sum(pie_means[4:])]], axis=0)
-    ax1 = ax.twiny()
-    ax1.axis("equal")
-    patches, texts = ax1.pie(pie_means, **pie_kws)
-    ax1.set_frame_on(False)
-    ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
-    ax1.set(title='Speaker \n n=' + str(np.sum(df.cat==2)))
+    if len(df3) > 0:
+        ax = seaborn.boxplot(data=df3, ax=axs[2], **boxplot_kws)
+        ax.set(xticklabels=[], xlabel="", ylabel="")
+        pie_means = df[df['cat'] == 2].mean() * 100
+        pie_means[pie_means < 0] = 0 
+        pie_means = pie_means.values[:-1]
+        pie_means = np.concatenate([pie_means[0:3], [np.sum(pie_means[4:])]], axis=0)
+        ax1 = ax.twiny()
+        ax1.axis("equal")
+        patches, texts = ax1.pie(pie_means, **pie_kws)
+        ax1.set_frame_on(False)
+        ax1.set(xticks=[], xticklabels=[], ylim=ylim, yticks=yticks, yticklabels=[], ylabel="")
+        ax1.set(title='Speaker \n n=' + str(np.sum(df.cat==2)))
 
     for ax in axs:
         seaborn.despine(ax=ax)
