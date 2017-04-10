@@ -584,68 +584,69 @@ def sfig1():
     return fig
 
 def fig3():
-    fig = plt.figure(figsize=(4.25, 5))
+    fig = plt.figure(figsize=(6, 5))
 
-    gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[1, 1.7], left=0.2)
-    gs_top = matplotlib.gridspec.GridSpecFromSubplotSpec(4, 2, subplot_spec=gs[0], height_ratios=[0.5, 0.6, 0.8, 1], hspace=0, wspace=0.1)
-    gs_bottom = matplotlib.gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1], hspace=0.7)
-    gs_neural = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_bottom[0], wspace=0.1)
-    gs_boxplot = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_bottom[1], width_ratios=[0.7, 1], wspace=1.1)
+    gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[1, 2.5], left=0.2)
+    gs_top = matplotlib.gridspec.GridSpecFromSubplotSpec(4, 3, subplot_spec=gs[0], height_ratios=[0.5, 0.5, 0.8, 1], hspace=0, wspace=0.1)
+    gs_bottom = matplotlib.gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1], height_ratios=[0.75, 1], hspace=0.7)
+    gs_neural = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs_bottom[0], wspace=0.1)
+    gs_bottom_row = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_bottom[1], width_ratios=[1,2], wspace=0.1)
+    gs_scatters = matplotlib.gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_bottom_row[1], wspace=0.6)
 
     # Panels A-D
     # Example speech and non-speech tokens (A, B) and average high-gamma responses from one electrode (C, D)
     token = 'sn2_st4_sp2'
-    wavfiles = [os.path.join(os.path.dirname(__file__), 'data', 'tokens', token +'.wav'), os.path.join(os.path.dirname(__file__), 'data', 'tokens_nonspeech', 'purr_female_st4_sn2.wav')]
+    wavfiles = [os.path.join(os.path.dirname(__file__), 'data', 'tokens', token +'.wav'),
+                os.path.join(os.path.dirname(__file__), 'data', 'tokens_missing_f0', 'purr_stretch_0_female_st4.wav'),
+                os.path.join(os.path.dirname(__file__), 'data', 'tokens_missing_f0', 'purr_missing_f0_noise_first_stretch_0_female_st4.wav')]
 
-    Y_mat__, sns, sts, sps, Y_mat = tang.load_Y_mat_sns_sts_sps_for_subject_number(123)
-    Y_mat_c__, sns_c, sts_c, sps_c, Y_mat_c = tang.load_Y_mat_sns_sts_sps_for_subject_number(123, control_stim=True)
-    r2_varpart, p_varpart, f_varpart = tang.load_encoding_results(123)
-    r2_varpart_c, p_varpart_c, f_varpart_c = tang.load_encoding_results(123, control_stim=True)
+    subject_number = 142
+    chan = 199
+
+    Y_mat__, sns, sts, sps, Y_mat = tang.load_Y_mat_sns_sts_sps_for_subject_number(subject_number, zscore_to_silence=False)
+    Y_mat_c__, sns_c, sts_c, sps_c, Y_mat_c = tang.load_Y_mat_sns_sts_sps_for_subject_number(subject_number, missing_f0_stim=True, zscore_to_silence=False)
 
     # Calculation of average high-gamma responses (mean and ste)
     # and time points where intonation conditions are significantly different.
-    chan = 162
     hg_sts = [Y_mat[chan, :, sts == i+1] for i in range(4)]
     hg_sts_means = [np.mean(st, axis=0) for st in hg_sts]
     hg_sts_stes = [np.std(st, axis=0)/np.sqrt(st.shape[0]) for st in hg_sts]
-    hg_sts_c = [Y_mat_c[chan, :, sts_c == i+1] for i in range(4)]
+
+    hg_sts_c = [Y_mat_c[chan, :, np.logical_and(sns_c == 1, sts_c == i+1)] for i in range(4)]
     hg_sts_means_c = [np.mean(st, axis=0) for st in hg_sts_c]
     hg_sts_stes_c = [np.std(st, axis=0)/np.sqrt(st.shape[0]) for st in hg_sts_c]
 
-    p_value = 0.05/(256*101)
+    hg_sts_c2 = [Y_mat_c[chan, :, np.logical_and(sns_c == 2, sts_c == i+1)] for i in range(4)]
+    hg_sts_means_c2 = [np.mean(st, axis=0) for st in hg_sts_c2]
+    hg_sts_stes_c2 = [np.std(st, axis=0)/np.sqrt(st.shape[0]) for st in hg_sts_c2]
 
-    sig = p_varpart[chan, :, 1] < p_value
-    sig_times_original = np.copy(centers)
-    sig_times_original[~sig] = np.NaN
-    sig = p_varpart_c[chan, :, 1] < p_value
-    sig_times_c = np.copy(centers)
-    sig_times_c[~sig] = np.NaN
-
-    sts_means = [hg_sts_means, hg_sts_means_c]
-    sts_stes = [hg_sts_stes, hg_sts_stes_c]
-    sig_times = [sig_times_original/100, sig_times_c/100]
+    sts_means = [hg_sts_means, hg_sts_means_c, hg_sts_means_c2]
+    sts_stes = [hg_sts_stes, hg_sts_stes_c, hg_sts_stes_c2]
 
     xvals_neural = np.arange(300)/100 - 0.25
 
-    for i in range(2):
+    for i in range(3): #loop over columns (different stim conditions)
         # Ampltiude signal (ax0, ax1), pitch contour (ax3), and spectrogram (ax2) of example speech and non-speech tokens
         [fs, sig] = sio.wavfile.read(wavfiles[i])
         ax0 = plt.subplot(gs_top[0, i])
         xvals = np.arange(len(sig))/fs
-        xmin = 1.5
-        xmax = xmin + 0.15
+        xmin = 1.55
+        xmax = xmin + 0.05
         xmin_index = np.int(xmin * fs)
         xmax_index = np.int(xmax * fs)
         ax0.plot(xvals[xmin_index:xmax_index], sig[xmin_index:xmax_index], color=[0.2, 0.2, 0.2], linewidth=0.8)
-        ax0.set(xticks=[], yticks=[], xlim=(xmin-0.04, xmax+0.05))
+        ax0.set(xticks=[], yticks=[], xlim=(xmin-0.02, xmax+0.02))
         if i == 0:
             ax0.set(title="Speech")
+            pitch = pitch_intensity[token]['pitch']
         else:
             ax0.set(title="Non-speech")
+            pitch = pitches[3]
         ax1 = plt.subplot(gs_top[1, i])
         sound = resample(np.atleast_2d(sig).T, (np.float(sig.size)/fs)*16000)
-        pitch = pitch_intensity[token]['pitch']
         xvals = np.arange(len(sig))/fs
+        if i == 2:
+            xvals = xvals - 0.25
         ax1.plot([-0.25, 2.75], [0.2, 0.2], color=[0.2,0.2,0.2], linewidth=0.6)
         ax1.plot(xvals, sig, color=[0.2,0.2,0.2], linewidth=0.6)
         ylim = ax1.get_ylim()
@@ -655,19 +656,26 @@ def fig3():
         ax1.plot([xmin, xmax], [ylim[0], ylim[0]], 'r')
         ax1.plot([xmin, xmax], [ylim[1], ylim[1]], 'r')
         ax1.set(yticks=[], xticklabels=[], xlim=(-0.25, 2.75))
-        
+
+        # Spectrogram
         ax2 = plt.subplot(gs_top[3, i])
         plt.sca(ax2)
         S = librosa.feature.melspectrogram(sig, sr=fs, n_mels=128, fmax=8000, n_fft=441*4, hop_length=441)
         log_S = librosa.logamplitude(S, ref_power=np.max)
         im = librosa.display.specshow(log_S, sr=fs, x_axis="time", y_axis="mel", fmax=8000)
-        im.axes.set(xlim=(-25, 275), yticks=[], xticks=[])
+        if i == 2:
+            im.axes.set(xlim=(0, 300), yticks=[], xticks=[]) #hard-coding for alignment to deal with noise starting 0.25s before onset.
+        else:
+            im.axes.set(xlim=(-25, 275), yticks=[], xticks=[])
         if i == 0:
             im.axes.set(ylabel="Frequency\n (Hz)")
         else:
             im.axes.set(ylabel="")
         im.set_cmap(plt.get_cmap("Greys"))
+        if i == 1:
+            im.set(clim=(-80, 15))
 
+        # Pitch contour
         ax3 = plt.subplot(gs_top[2, i])
         ax3.plot(np.arange(pitch.shape[0]), pitch, color='m', marker='.', markersize=8)
         ax3.set(xlim=(-25, 275), ylim=(50, 300), yticks=[], xticklabels=[])
@@ -686,8 +694,7 @@ def fig3():
         ax4.fill_between(xvals_neural, sts_means[i][1]-sts_stes[i][1], sts_means[i][1]+sts_stes[i][1], color='g', alpha=0.8)
         ax4.fill_between(xvals_neural, sts_means[i][2]-sts_stes[i][2], sts_means[i][2]+sts_stes[i][2], color='r', alpha=0.8)
         ax4.fill_between(xvals_neural, sts_means[i][3]-sts_stes[i][3], sts_means[i][3]+sts_stes[i][3], color='m', alpha=0.8)
-        ax4.set(ylim=(-1, 3.5), yticks=[-1, 0, 1, 2, 3], xlim=(-0.25, 2.75), xlabel="Time (s)")
-        ax4.plot(sig_times[i], [3.4]*len(sig_times[i]), 'k')
+        ax4.set(ylim=(-1, 3), yticks=[-1, 0, 1, 2, 3], xlim=(-0.25, 2.75), xlabel="Time (s)")
         if i == 0:
             ax4.set(ylabel="High-gamma (z-score)")
         else:
@@ -695,29 +702,33 @@ def fig3():
 
     # Panel E
     # Box plot showing accuracies of speech-trained LDA model on speech and non-speech data.
-    ax_box = plt.subplot(gs_boxplot[0, 0])
+    ax_box = plt.subplot(gs_bottom_row[0])
 
-    accs, accs_test = tang.load_control_test_accs(123)
-    accs2 = np.zeros((256, 1000, 4))
-    accs2[:, :, 0:3] = accs
+    accs, accs_test, _ = tang.load_control_test_accs(subject_number, chans=True, missing_f0=True, zscore_to_silence=False)
+    accs2 = np.zeros((256, 1000, 6))
+    accs2[:, :, 0:2] = accs[:, :, [2,3]]
+    accs2[:,:,2] = np.NaN
+    accs2[:,0,2] = accs_test[:, 1]
     accs2[:,:,3] = np.NaN
-    accs2[:,0,3] = accs_test
+    accs2[:,0,3] = accs_test[:, 2]
+    accs2[:, :, 4:6] = accs[:, :, [4, 5]]
     accs = accs2
 
     ax_box.axhline(0.25, 0, 1, color='gray', alpha=0.5)
-    df = pd.melt(pd.DataFrame(accs[chan, :, [0,3]].T, columns=['speech', 'non-speech']), value_name="Classification accuracy")
+    df = pd.melt(pd.DataFrame(accs[chan, :, [0,2,3]].T, columns=['speech', 'non-speech', 'missing f0']), value_name="Classification accuracy")
     df['type']= "Test"
 
-    df_shuf = pd.melt(pd.DataFrame(accs[chan, :, [1,2]].T, columns=['speech', 'non-speech']), value_name="Classification accuracy")
+    df_shuf = pd.melt(pd.DataFrame(accs[chan, :, [1,4,5]].T, columns=['speech', 'non-speech', 'missing f0']), value_name="Classification accuracy")
     df_shuf['type']= "Shuffled"
     seaborn.boxplot(data=pd.concat([df,df_shuf]), hue='type', y='Classification accuracy', x='variable', ax=ax_box)
     plt.axes(ax_box)
     plt.legend(bbox_to_anchor=(0.6, 1.05), loc=2)
+    ax_box.set_ylim(0, 1)
 
     # Panel F
     # Scatterplot of accuracies for speech data versus accuracies for non-speech data
 
-    # For five participants who heard non-speech stimuli, test to see whether speech-trained models for significant electrodes
+    # For five participants who heard original non-speech stimuli, test to see whether speech-trained models for significant electrodes
     # predicted non-speech data as well as held out speech data
     invariant = []
     mean_accs = []
@@ -725,11 +736,61 @@ def fig3():
     for subject_number in [122, 123, 125, 129, 131]:
         sig_elecs = tang.get_sig_elecs_from_full_model(subject_number)
         accs, accs_test = tang.load_control_test_accs(subject_number)
-        mean_accs.append(np.nanmean(accs, axis=1)[sig_elecs])
-        nonspeech_test_accs.append(accs_test.T[sig_elecs])
+        mean_accs.append(np.nanmean(accs, axis=1)[sig_elecs, 0])
+        nonspeech_test_accs.append(accs_test.T[sig_elecs, 0])
         for sig_elec in sig_elecs:
             value = accs_test[0, sig_elec]
             min_max = np.percentile(accs[sig_elec, :, 0], [2.5, 97.5])
+            if value < min_max[1] and value > min_max[0]:
+                invariant.append(1)
+            else:
+                invariant.append(0)
+
+    # For three participants who heard flat-ampltidude, non-speech stimuli, do the same thing and combine
+    # these electrodes with the ones from the original non-speech stimuli.
+    for subject_number in [137, 142, 143]:
+        sig_elecs = tang.get_sig_elecs_from_full_model(subject_number)
+        accs, accs_test = tang.load_control_test_accs(subject_number, missing_f0=True, zscore_to_silence=False)
+        mean_accs.append(np.nanmean(accs, axis=1)[sig_elecs, 0])
+        nonspeech_test_accs.append(accs_test[sig_elecs, 1])
+        for sig_elec in sig_elecs:
+            value = accs_test[sig_elec, 1]
+            min_max = np.percentile(accs[sig_elec, :, 0], [2.5, 97.5])
+            if value < min_max[1] and value > min_max[0]:
+                invariant.append(1)
+            else:
+                invariant.append(0)
+
+    invariant = np.array(invariant)
+    mean_accs = np.concatenate(mean_accs, axis=0)
+    nonspeech_test_accs = np.concatenate(nonspeech_test_accs, axis=0)
+
+    # First scatterplot with non-speech, with f0. 
+    ax = plt.subplot(gs_scatters[0])
+
+    ax.axhline(0.25, 0, 1, color='gray', alpha=0.5)
+    ax.axvline(0.25, 0, 1, color='gray', alpha=0.5)
+    ax.plot([0.2,1],[0.2,1], 'gray', alpha=0.5)
+    ax.scatter(mean_accs[invariant==1], nonspeech_test_accs[invariant==1], color='k', marker='.')
+    ax.scatter(mean_accs[invariant==0], nonspeech_test_accs[invariant==0], color='red', marker='.')
+
+    ax.axis("square")
+    ax.set(xlim=(0.2,1), ylim=(0.2,1), xticks=[0.2,0.4,0.6,0.8,1.0], yticks=[0.2,0.4,0.6,0.8,1.0], 
+            xlabel="Accuracy for speech", ylabel="Accuracy for non-speech\nwith f0")
+
+    # For three participants who heard missing f0 stimuli, test to see whether speech-trained models for significant electrodes
+    # predicted missing f0 data as well as held out speech data
+    invariant = []
+    mean_accs = []
+    nonspeech_test_accs = []
+    for subject_number in [137, 142, 143]:
+        sig_elecs = tang.get_sig_elecs_from_full_model(subject_number)
+        accs, accs_test = tang.load_control_test_accs(subject_number, missing_f0=True, zscore_to_silence=False)
+        mean_accs.append(np.nanmean(accs, axis=1)[sig_elecs])
+        nonspeech_test_accs.append(accs_test[sig_elecs, 2])
+        for sig_elec in sig_elecs:
+            value = accs_test[sig_elec, 2]
+            min_max = np.percentile(accs[sig_elec, :, 2], [2.5, 97.5])
             if value < min_max[1] and value > min_max[0]:
                 invariant.append(1)
             else:
@@ -738,17 +799,18 @@ def fig3():
     mean_accs = np.concatenate(mean_accs, axis=0)
     nonspeech_test_accs = np.concatenate(nonspeech_test_accs, axis=0)
 
-    ax = plt.subplot(gs_boxplot[0, 1])
+    # Second scatterplot with non-speech, missing f0.
+    ax = plt.subplot(gs_scatters[1])
 
     ax.axhline(0.25, 0, 1, color='gray', alpha=0.5)
     ax.axvline(0.25, 0, 1, color='gray', alpha=0.5)
     ax.plot([0.2,1],[0.2,1], 'gray', alpha=0.5)
-    ax.scatter(mean_accs[invariant==1,0], nonspeech_test_accs[invariant==1,0], color='k', marker='.')
-    ax.scatter(mean_accs[invariant==0,0], nonspeech_test_accs[invariant==0,0], color='red', marker='.')
+    ax.scatter(mean_accs[invariant==1,0], nonspeech_test_accs[invariant==1], color='k', marker='.')
+    ax.scatter(mean_accs[invariant==0,0], nonspeech_test_accs[invariant==0], color='red', marker='.')
 
     ax.axis("square")
     ax.set(xlim=(0.2,1), ylim=(0.2,1), xticks=[0.2,0.4,0.6,0.8,1.0], yticks=[0.2,0.4,0.6,0.8,1.0], 
-            xlabel="Accuracy for speech", ylabel="Accuracy\n for non-speech")
+            xlabel="Accuracy for speech", ylabel="Accuracy for non-speech\nmissing f0")
 
     seaborn.despine()
     return fig
