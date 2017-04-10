@@ -34,6 +34,7 @@ from .intonation_invariance import load_control_test_accs, load_invariance_test_
 from .pitch_trf import load_cv_model_fold, get_intonation_tokens_stim, get_abs_and_rel_sig
 
 from . import erps
+from . import timit
 
 encoding_colors = ['#ff2f97', '#5674ff', '#3fd400' , '#ae55c6', '#4ea47e', '#d3c26a', '#999999']
 encoding_colors_black = ['#ff2f97', '#5674ff', '#3fd400' , 'k']
@@ -77,6 +78,7 @@ def load_all_data(subject_numbers=None):
     r2s_abs = []
     r2s_rel = []
     wtss = []
+    all_psis = []
     for subject_number in subject_numbers:
         r2_varpart, p_varpart, f_varpart = load_encoding_results(subject_number)
         data_varpart = pd.DataFrame(np.nanmax(r2_varpart, 1), columns=['sn', 'st', 'sp', 'sn st', 'sn sp', 'st sp', 'sn st sp'])
@@ -124,14 +126,18 @@ def load_all_data(subject_numbers=None):
 
         wtss.append(np.mean(wts_all, axis=2))
 
+        average_response, psis = timit.load_average_response_psis_for_subject_number(subject_number)
+        all_psis.append(psis)
+
     cat_all = np.concatenate(cats)
     r_mean_all = np.concatenate(r_means)
     r_max_all = np.concatenate(r_maxs)
     r2s_abs = np.concatenate(r2s_abs)
     r2s_rel = np.concatenate(r2s_rel)
+    all_psis = np.concatenate(all_psis, axis=1)
     datas = pd.concat(datas)
 
-    return datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss
+    return datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, all_psis
 
 def plot_encoding_summary(ax):
     r_mean_all, r_max_all, cat_all, abs_r2s, rel_r2s = load_all_data()

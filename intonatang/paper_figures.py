@@ -384,7 +384,7 @@ def fig2():
 
     # Panel N
     # Box plots showing distribution of proportion of variance explained by main effects and interactions
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data()
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, _ = tang.load_all_data()
 
     ax1 = plt.subplot(gs_bar[1, 0])
     ax2 = plt.subplot(gs_bar[1, 1])
@@ -553,7 +553,7 @@ def sfig1():
     ax.set(xticks=[], yticks=[])
 
     # Left hemisphere subjects
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([113, 118, 122, 123, 131, 143])
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, _ = tang.load_all_data([113, 118, 122, 123, 131, 143])
     ax1 = plt.subplot(gs_left[0])
     ax2 = plt.subplot(gs_left[1])
     ax3 = plt.subplot(gs_left[2])
@@ -568,7 +568,7 @@ def sfig1():
     axs, patches = add_encoding_boxplots_to_axs(axs1, df)
 
     # Right hemisphere subjects
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([125, 129, 137, 142])
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, _ = tang.load_all_data([125, 129, 137, 142])
     ax1 = plt.subplot(gs_right[0])
     ax2 = plt.subplot(gs_right[1])
     ax3 = plt.subplot(gs_right[2])
@@ -818,7 +818,33 @@ def fig3():
     seaborn.despine()
     return fig
 
-def sfig_timit_pitch():
+def sfig2_scatterplots():
+    fig, axs = plt.subplots(3, 1, figsize=(2.1, 4), sharey=True, sharex=True)
+    
+    datas, _, _, _, _, _, _, all_psis = tang.load_all_data()
+    sig = datas.sig_full.values
+    ys = np.mean(all_psis, axis=0)[sig]
+    axs[0].plot(ys, datas.sn.values[sig], 'ko', markersize=2)
+    axs[1].plot(ys, datas.st.values[sig],'ko', markersize=2)
+    axs[2].plot(ys, datas.sp.values[sig],'ko', markersize=2)
+    axs[0].set_xlim(-2, 26)
+    axs[0].set_ylim(-0.06, 1.11)
+    axs[0].set_ylabel("Sentence")
+    axs[1].set_ylabel("Intonation")
+    axs[2].set_ylabel("Speaker")
+    axs[2].set_xlabel("Mean PSI")
+    seaborn.despine()
+
+    sn_corr = pearsonr(datas.sn.values[sig], ys)
+    st_corr = pearsonr(datas.st.values[sig], ys)
+    sp_corr = pearsonr(datas.sp.values[sig], ys)
+    print("Corrrelation between mean PSI and Sentence R2: {:.2f}, (p={:.2e})".format(*sn_corr))
+    print("Corrrelation between mean PSI and Intonation R2: {:.2f}, (p={:.2e})".format(*st_corr))
+    print("Corrrelation between mean PSI and Speaker R2: {:.2f}, (p={:.2e})".format(*sp_corr))
+
+    return fig
+
+def sfig3():
     timit_pitch = timit.get_timit_pitch()
     sentences = timit_pitch.index.get_level_values(0)
     sentences = pd.Series(sentences).unique()
@@ -1021,7 +1047,7 @@ def fig4():
 
     # Panel D
     # Example receptive field
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data()
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, _ = tang.load_all_data()
     wts = wtss[5]
     chan = 182
     subject_number = 129
@@ -1255,7 +1281,7 @@ def sfig5():
     ptrf_and_prediction(gs_top_ptrf, gs_top_pred, 129, 202, ylim=(-1.1, 1.6))
     ptrf_and_prediction(gs_bottom_ptrf, gs_bottom_pred, 131, 195, with_stimulus=False, ylim=(-1.4, 4.2))
 
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data()
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, _ = tang.load_all_data()
 
     # Scatter plot of relative and absolute pitch encoding versus intonation condition encoding
     ax_rel = plt.subplot(gs_scatter[0])
@@ -1295,7 +1321,7 @@ def sfig5():
     return fig
 
 def ptrf_and_prediction(gs_ptrf, gs_pred, subject_number, chan, with_stimulus=True, ylim=(-1.8, 4)):
-    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss = tang.load_all_data([subject_number])
+    datas, r_mean_all, r_max_all, cat_all, r2s_abs, r2s_rel, wtss, _ = tang.load_all_data([subject_number])
     wts = wtss[0]
 
     add_ptrf_to_gs(gs_ptrf, wts, chan, shorten_ylabel=True)
