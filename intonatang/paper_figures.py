@@ -768,6 +768,8 @@ def fig3():
     mean_accs = np.concatenate(mean_accs, axis=0)
     nonspeech_test_accs = np.concatenate(nonspeech_test_accs, axis=0)
 
+    print("Invariant electrodes for non-speech, with f0: {:d}/{:d}, {:.2f}%".format(np.sum(invariant==1), len(invariant), np.mean(invariant)))
+
     # First scatterplot with non-speech, with f0. 
     ax = plt.subplot(gs_scatters[0])
 
@@ -801,6 +803,8 @@ def fig3():
     invariant = np.array(invariant)
     mean_accs = np.concatenate(mean_accs, axis=0)
     nonspeech_test_accs = np.concatenate(nonspeech_test_accs, axis=0)
+
+    print("Invariant electrodes for non-speech, missing f0: {:d}/{:d}, {:.2f}%".format(np.sum(invariant==1), len(invariant), np.mean(invariant)))
 
     # Second scatterplot with non-speech, missing f0.
     ax = plt.subplot(gs_scatters[1])
