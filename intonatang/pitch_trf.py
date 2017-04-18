@@ -106,7 +106,29 @@ def run_ptrf_analysis_pipeline_for_subject_number_testing_rel_versus_change(subj
 
     save_cv_model_fold(subject_number, test_corr_all, test_corr_rel, test_corr_change, r2_rel, r2_change, wts_all, wts_rel, wts_change, pitch_scaling=pitch_scaling, note="_rel_versus_pitch_change")
 
-def run_ptrf_analysis_permutation_test(subject_number, pitch_scaling="log"):
+def get_subject_permutation_test_data(subject_number, n_perms=200, pitch_scaling="log"):
+    out = timit.load_h5py_out(subject_number)
+    for trial in out:
+        n_chans = out[trial]['ecog'].shape[0]
+        break
+
+    try:
+        r2_all_perms, r2_abs_perms, r2_rel_perms = load_cv_shuffle_fold(subject_number, pitch_scaling=pitch_scaling)
+        if r2_all_perms.shape[1] != n_perms:
+            r2_all_perms = np.zeros((n_chans, n_perms))
+            r2_abs_perms = np.zeros((n_chans, n_perms))
+            r2_rel_perms = np.zeros((n_chans, n_perms))
+    except:
+        r2_all_perms = np.zeros((n_chans, n_perms))
+        r2_abs_perms = np.zeros((n_chans, n_perms))
+        r2_rel_perms = np.zeros((n_chans, n_perms))
+
+    return r2_all_perms, r2_abs_perms, r2_rel_perms
+
+def run_ptrf_analysis_permutation_test(subject_number, n_perms=200, pitch_scaling="log", which_perms=None):
+    print("Running ptrf permutation for EC" + str(subject_number))
+    print("permutations:")
+    print(which_perms)
     timit_pitch = timit.get_timit_pitch_phonetic()
     abs_bin_edges, rel_bin_edges = get_bin_edges_abs_rel(timit_pitch, pitch_scaling=pitch_scaling)
 
@@ -115,13 +137,18 @@ def run_ptrf_analysis_permutation_test(subject_number, pitch_scaling="log"):
         n_chans = out[trial]['ecog'].shape[0]
         break
 
-    n_perms = 25
+    if which_perms is None:
+        r2_all_perms_run = np.zeros((n_chans, n_perms))
+        r2_abs_perms_run = np.zeros((n_chans, n_perms))
+        r2_rel_perms_run = np.zeros((n_chans, n_perms))
+    else:
+        r2_all_perms_run = np.zeros((n_chans, len(which_perms)))
+        r2_abs_perms_run = np.zeros((n_chans, len(which_perms)))
+        r2_rel_perms_run = np.zeros((n_chans, len(which_perms)))
 
-    r2_all_perms = np.zeros((n_chans, n_perms))
-    r2_abs_perms = np.zeros((n_chans, n_perms))
-    r2_rel_perms = np.zeros((n_chans, n_perms))
-
-    for perm in range(n_perms):
+    for perm_i, perm in enumerate(range(n_perms)) if which_perms is None else enumerate(which_perms):
+        perm = int(perm)
+        print("Perm: " + str(perm))
         timit_pitch_shuffled = load_timit_shuffled(perm)
 
         test_corr_all = np.zeros((n_chans, 25))
@@ -129,6 +156,7 @@ def run_ptrf_analysis_permutation_test(subject_number, pitch_scaling="log"):
         test_corr_rel_bin = np.zeros((n_chans, 25))
 
         for i in range(25):
+            print(i)
             pitch_intensity, neural_activity, last_indexes = get_neural_activity_and_pitch_phonetic_for_fold(out, timit_pitch_shuffled, i, pitch_scaling=pitch_scaling)
             stims_all, resps_all = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="all")
             stims_abs_bin, resps_abs_bin = get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity, neural_activity, last_indexes, abs_bin_edges, rel_bin_edges, feat="abs_bin")
@@ -139,15 +167,26 @@ def run_ptrf_analysis_permutation_test(subject_number, pitch_scaling="log"):
         
         r2_abs_folds = test_corr_all ** 2 - test_corr_rel_bin ** 2
         r2_rel_folds = test_corr_all ** 2 - test_corr_abs_bin ** 2
-        r2_abs_perms[:, perm] = np.mean(r2_abs_folds, axis=1)
-        r2_rel_perms[:, perm] = np.mean(r2_rel_folds, axis=1)
-        r2_all_perms[:, perm] = np.mean(test_corr_all**2, axis=1)
+        r2_abs_perms_run[:, perm_i] = np.mean(r2_abs_folds, axis=1)
+        r2_rel_perms_run[:, perm_i] = np.mean(r2_rel_folds, axis=1)
+        r2_all_perms_run[:, perm_i] = np.mean(test_corr_all**2, axis=1)
+
+    r2_all_perms, r2_abs_perms, r2_rel_perms = get_subject_permutation_test_data(subject_number, n_perms=n_perms, pitch_scaling=pitch_scaling)
+
+    if which_perms is None:
+        r2_all_perms = r2_all_perms_run
+        r2_abs_perms = r2_abs_perms_run
+        r2_rel_perms = r2_rel_perms_run
+    else:
+        r2_all_perms[:, which_perms] = r2_all_perms_run
+        r2_abs_perms[:, which_perms] = r2_abs_perms_run
+        r2_rel_perms[:, which_perms] = r2_rel_perms_run
 
     save_cv_shuffle_fold(subject_number, r2_all_perms, r2_abs_perms, r2_rel_perms)
 
 def get_abs_and_rel_sig(subject_number):
     r_all, r_abs, r_rel, abs_r2, rel_r2, wts_all, wts_abs, wts_rel = load_cv_model_fold(subject_number)
-    ptrf_permutation_data = sio.loadmat(os.path.join(results_path, 'EC' + str(subject_number) + '_shuffle25_25fold_ptrf_results_10bins.mat'))
+    ptrf_permutation_data = sio.loadmat(os.path.join(results_path, 'EC' + str(subject_number) + '_shuffle200_25fold_ptrf_results_10bins.mat'))
     r2_abs_perms = ptrf_permutation_data['r2_abs']
     r2_rel_perms = ptrf_permutation_data['r2_rel']
     abs_sig = np.ones((256)) * -1
@@ -275,7 +314,7 @@ def get_stim_and_resp_from_pitch_intensity_neural_activity_fold(pitch_intensity,
         if nbins==10:
             stim_pitch_abs = get_pitch_matrix(abs_pitch, abs_bin_edges)
             stim_pitch_rel = get_pitch_matrix(rel_pitch, rel_bin_edges)
-            if abs_change_bin_edges:
+            if abs_change_bin_edges is not None:
                 stim_pitch_abs_change = get_pitch_matrix(abs_pitch_change, abs_change_bin_edges)
 
         pitch_binary = np.any(stim_pitch_rel, axis=1).astype(np.int)[:, np.newaxis]
@@ -366,14 +405,14 @@ def load_cv_model_fold(subject_number, pitch_scaling="log", note=""):
     return data['r_all'], data['r_abs_bin'], data['r_rel_bin'], data['r2_abs'], data['r2_rel'], data['wts_all'], data['wts_abs'], data['wts_rel']
 
 def save_cv_shuffle_fold(subject_number, r2_all, r2_abs, r2_rel, pitch_scaling="log"):
-    filename = 'EC' + str(subject_number) + '_shuffle25_25fold_ptrf_results_10bins.mat'
+    filename = 'EC' + str(subject_number) + '_shuffle200_25fold_ptrf_results_10bins.mat'
     if pitch_scaling != "log":
         filename = filename + "_" + pitch_scaling
     filename = os.path.join(results_path, filename)
     sio.savemat(filename, {'r2_all': r2_all, 'r2_abs': r2_abs, 'r2_rel': r2_rel})
 
 def load_cv_shuffle_fold(subject_number, pitch_scaling="log"):
-    filename = 'EC' + str(subject_number) + '_shuffle25_25fold_ptrf_results_10bins.mat'
+    filename = 'EC' + str(subject_number) + '_shuffle200_25fold_ptrf_results_10bins.mat'
     if pitch_scaling != "log":
         filename = filename + "_" + pitch_scaling
     filename = os.path.join(results_path, filename)
