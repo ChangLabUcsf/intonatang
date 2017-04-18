@@ -23,7 +23,7 @@ def generate_all_results(regenerate_processed_timit_data=False):
     if regenerate_processed_timit_data:
         generate_processed_timit_data()
 
-    subject_numbers = [113, 118, 122, 123, 125, 129, 131]
+    subject_numbers = [113, 118, 122, 123, 125, 129, 131, 137, 142, 143]
     for subject_number in subject_numbers:
         out = load_h5py_out(subject_number)
         average_response = get_average_response_to_phonemes(out)
@@ -171,6 +171,12 @@ def load_tables_out(subject_number):
         out = f.root.EC129
     elif subject_number == 131:
         out = f.root.EC131
+    elif subject_number == 137:
+        out = f.root.EC137
+    elif subject_number == 142:
+        out = f.root.EC142
+    elif subject_number == 143:
+        out = f.root.EC143
     return out
 
 def load_h5py_out(subject_number):
@@ -371,8 +377,8 @@ def get_psis(out, phoneme_order=phoneme_order):
         # all instances of a specific phoneme in the set of timit sentences a subject heard
         phoneme_instances = timit_phonemes[timit_phonemes.phn == phoneme]
 
-        activity_phoneme = np.zeros((256, len(phonemes_instances)))
-        for i, trial in enumerate(phonemes_instances.iterrows()):
+        activity_phoneme = np.zeros((256, len(phoneme_instances)))
+        for i, trial in enumerate(phoneme_instances.iterrows()):
             timit_name = trial[0][0]
             start_time = trial[1].start_time
             index = np.int(round((start_time + 0.11)*100) + 50)
