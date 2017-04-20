@@ -1,5 +1,5 @@
 include intonatang/data/brain_imaging/EC113*
-graft intonatang/data/subject_data/EC113
+
 graft intonatang/data/timit
 graft intonatang/data/timit_pitch
 graft intonatang/data/timit_tokens
