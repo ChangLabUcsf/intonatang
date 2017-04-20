@@ -7,7 +7,10 @@ build/
 
 **/*.ipynb_checkpoints
 
+.dropbox
+
 .DS_Store
+Icon
 
 intonatang/data/brain_imaging/*.png
 intonatang/data/brain_imaging/*.mat
