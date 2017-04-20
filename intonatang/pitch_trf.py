@@ -83,9 +83,9 @@ def run_ptrf_analysis_pipeline_for_subject_number_testing_rel_versus_change(subj
     test_corr_rel = np.zeros((n_chans, 25))
     test_corr_change = np.zeros((n_chans, 25))
 
-    wts_all = np.zeros((n_chans, 1564, 25)) #1058 = 46 * 23
-    wts_rel = np.zeros((n_chans, 1104, 25)) #598 = 46*13
-    wts_change = np.zeros((n_chans, 1104, 25))
+    wts_all = np.zeros((n_chans, 1518, 25)) #1058 = 46 * 23
+    wts_rel = np.zeros((n_chans, 1058, 25)) #598 = 46*13
+    wts_change = np.zeros((n_chans, 1058, 25))
 
     abs_bin_edges, rel_bin_edges = get_bin_edges_abs_rel(timit_pitch, pitch_scaling=pitch_scaling)
     abs_change_bin_edges = get_bin_edges_abs_pitch_change(timit_pitch, pitch_scaling=pitch_scaling)
@@ -596,36 +596,38 @@ def get_channel_order():
         channel_order.append(x)
     return np.hstack(channel_order)
 
-def plot_trf(wts, chan):
+def plot_trf(wts, chan, wts_shape=(46,23), wts1=(0, 10), wts2=(10, 20), min_max=(0, 20), wts1_label=None, wts2_label=None):
     fig, axs = plt.subplots(2, 1, figsize=(3.5, 5), sharex=True)
-    min_value = np.min(wts[chan].reshape(46,23)[3:43, 0:20])
-    max_value = np.max(wts[chan].reshape(46,23)[3:43, 0:20])
+    min_value = np.min(wts[chan].reshape(*wts_shape)[3:43, min_max[0]:min_max[1]])
+    max_value = np.max(wts[chan].reshape(*wts_shape)[3:43, min_max[0]:min_max[1]])
     abs_value = np.max(np.abs([min_value, max_value]))
     min_value = -1 * abs_value
     max_value = abs_value
-    im1 = axs[0].imshow(np.fliplr(np.flipud(wts[chan].reshape(46, 23)[3:43,0:10].T)), cmap=plt.get_cmap('RdBu_r'), aspect="auto")
-    im3 = axs[1].imshow(np.fliplr(np.flipud(wts[chan].reshape(46, 23)[3:43,10:20].T)), cmap=plt.get_cmap('PuOr_r'), aspect="auto")
+    im1 = axs[0].imshow(np.fliplr(np.flipud(wts[chan].reshape(*wts_shape)[3:43, wts1[0]:wts1[1]].T)), cmap=plt.get_cmap('RdBu_r'), aspect="auto")
+    im3 = axs[1].imshow(np.fliplr(np.flipud(wts[chan].reshape(*wts_shape)[3:43, wts2[0]:wts2[1]].T)), cmap=plt.get_cmap('PuOr_r'), aspect="auto")
     for im in [im1, im3]:
         im.set_clim((-1 * abs_value, abs_value))
     min_tick_value = np.trunc(np.ceil(min_value * 100))/100
     max_tick_value = np.trunc(np.floor(max_value * 100))/100
     fig.colorbar(im1, ax=axs[0], ticks=[min_tick_value, 0, max_tick_value], aspect=10)
     fig.colorbar(im3, ax=axs[1], ticks=[min_tick_value, 0, max_tick_value], aspect=10)
-    im1.axes.set(yticks=(0, 3, 6, 9), yticklabels=[250, 200, 150, 90], ylabel="Absolute pitch (Hz)")
-    im3.axes.set(xticks=[0, 39], xticklabels=[400, 0], xlabel="Delay (ms)", 
-        yticks=(0,3,6,9), yticklabels=[1.7, 0.6, -0.5, -1.7], ylabel="Relative pitch (z-score)")
+    if wts1_label is None:
+        im1.axes.set(yticks=(0, 3, 6, 9), yticklabels=[250, 200, 150, 90], ylabel="Absolute pitch (Hz)")
+    if wts2_label is None:
+        im3.axes.set(xticks=[0, 39], xticklabels=[400, 0], xlabel="Delay (ms)", 
+            yticks=(0,3,6,9), yticklabels=[1.7, 0.6, -0.5, -1.7], ylabel="Relative pitch (z-score)")
     fig.tight_layout()
     return fig
 
 def plot_trf_rel_versus_change(wts, chan):
     fig, axs = plt.subplots(2, 1, figsize=(3.5, 5), sharex=True)
-    min_value = np.min(wts[chan].reshape(46,34)[3:43, 10:30])
-    max_value = np.max(wts[chan].reshape(46,34)[3:43, 10:30])
+    min_value = np.min(wts[chan].reshape(46,33)[3:43, 10:30])
+    max_value = np.max(wts[chan].reshape(46,33)[3:43, 10:30])
     abs_value = np.max(np.abs([min_value, max_value]))
     min_value = -1 * abs_value
     max_value = abs_value
-    im1 = axs[0].imshow(np.fliplr(np.flipud(wts[chan].reshape(46, 34)[3:43,20:30].T)), cmap=plt.get_cmap('RdBu_r'), aspect="auto")
-    im3 = axs[1].imshow(np.fliplr(np.flipud(wts[chan].reshape(46, 34)[3:43,10:20].T)), cmap=plt.get_cmap('PuOr_r'), aspect="auto")
+    im1 = axs[0].imshow(np.fliplr(np.flipud(wts[chan].reshape(46, 33)[3:43,20:30].T)), cmap=plt.get_cmap('RdBu_r'), aspect="auto")
+    im3 = axs[1].imshow(np.fliplr(np.flipud(wts[chan].reshape(46, 33)[3:43,10:20].T)), cmap=plt.get_cmap('PuOr_r'), aspect="auto")
     for im in [im1, im3]:
         im.set_clim((-1 * abs_value, abs_value))
     min_tick_value = np.trunc(np.ceil(min_value * 100))/100
