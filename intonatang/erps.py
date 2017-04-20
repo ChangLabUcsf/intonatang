@@ -95,7 +95,7 @@ def add_erps(axs, times, hg, color, plot_kws={}, hz=100, back=25, forward=275, b
             ax.set_yticks([min_value, max_value])
     return axs
 
-def plot_erps(times, hg, highlight_channels=np.array([300]), zscore=True, hz=400, back=100, forward=500, bcs=[], channel_order=None, minigrid=False, xticks=None):
+def plot_erps(times, hg, highlight_channels=[np.array([300])], highlight_colors=['orange'], zscore=True, hz=400, back=100, forward=500, bcs=[], channel_order=None, minigrid=False, xticks=None):
     if minigrid:
         n_chans = 64
     else:
@@ -135,16 +135,18 @@ def plot_erps(times, hg, highlight_channels=np.array([300]), zscore=True, hz=400
             else:
                 ax = fig.add_subplot(16,16,channel_order[i])
             xvals = np.arange(average_hg[i].shape[0])
-            ax.fill_between(xvals, average_hg[i]-ste_hg[i], average_hg[i]+ste_hg[i])
-            ax.plot(average_hg[i])
+            #ax.fill_between(xvals, average_hg[i]-ste_hg[i], average_hg[i]+ste_hg[i])
+            ax.plot(average_hg[i], color='gray')
             ax.set_xticklabels([])
             ax.set_yticklabels([])
             ax.set_ylim(min_value, max_value)
             ax.set_yticks([min_value, max_value])
             if xticks is not None:
                 ax.set_xticks(xticks)
-            if (i+1 == highlight_channels).any():
-                ax.set_axis_bgcolor('orange')
+            for highlight_channels_, highlight_color in zip(highlight_channels, highlight_colors):
+                if (i+1 == highlight_channels_).any():
+                    ax.set_axis_bgcolor(highlight_color)
+                    ax.patch.set_alpha(0.3)
             ax.text(0.2,0.8,str(i),transform=ax.transAxes)
 
     return fig, average_hg, ste_hg
