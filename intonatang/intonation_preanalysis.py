@@ -331,14 +331,25 @@ def get_timelocked_activity(times, hg, zscore=True, hz=100, back=0, forward=250,
         baseline_mean = np.nanmean(baseline, axis=1)
         baseline_std = np.nanstd(baseline, axis=1)
 
+        print("baseline length: " + str(len(baseline[199])))
+
+        print("baseline_mean: " + str(baseline_mean[199]))
+        print("baseline_std: " + str(baseline_std[199]))
+
     for i, seconds in enumerate(times[0]):
         index = int(np.round(seconds * hz))
         if zscore_to_silence:
-            Y_mat[:,:,i] = hg[:, int(index-back):int(index+forward)]
+            try:
+                Y_mat[:,:,i] = hg[:, int(index-back):int(index+forward)]
+            except:
+                print('Error creating Y_mat at trial i: ' + str(i) + ' index: ' + str(index))
             for t in range(Y_mat.shape[1]):
                 Y_mat[:, t, i] = (Y_mat[:, t, i] - baseline_mean)/baseline_std
         else:
-            Y_mat[:,:,i] = hg[:, index-back:index+forward]
+            try:
+                Y_mat[:,:,i] = hg[:, index-back:index+forward]
+            except:
+                print('Error creating Y_mat at trial i: ' + str(i) + ' index: ' + str(index))
             if np.sum(np.isnan(Y_mat[:,:,i])) > 0:
                 print(i)
                 print(np.sum(np.isnan(Y_mat[:,:,i])))
