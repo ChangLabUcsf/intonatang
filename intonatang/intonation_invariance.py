@@ -103,7 +103,7 @@ def test_invariance_control(subject_number, solver="lsqr", shrinkage=1, n_perms=
 
     return accs, accs_test
 
-def save_control_test_accs(subject_number, accs, accs_test, diagonal=True, missing_f0=False):
+def save_control_test_accs(subject_number, accs, accs_test, chans=None, diagonal=True, missing_f0=False, zscore_to_silence=True):
     """Used to save the nonspeech control invariance analysis results. 
 
     After running ``test_invariance_control``, save ``accs`` and ``accs_test`` for a subject.
@@ -118,14 +118,21 @@ def save_control_test_accs(subject_number, accs, accs_test, diagonal=True, missi
         missing_f0 (bool): missing f0 invariance analysis
     """
     info_str = ""
+    if zscore_to_silence is False:
+        info_str = info_str + "_zscore_block"
     if missing_f0:
         info_str = info_str + "_missing_f0"
     if diagonal:
         info_str = info_str + "_diagonal"
+    if chans is not None:
+        info_str = info_str + "_chans"
     filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
-    sio.savemat(filename, {'accs': accs, 'accs_test': accs_test})
+    if chans is not None:
+        sio.savemat(filename, {'accs': accs, 'accs_test': accs_test, 'chans': chans})
+    else:
+        sio.savemat(filename, {'accs': accs, 'accs_test': accs_test})
 
-def load_control_test_accs(subject_number, diagonal=True, missing_f0=False):
+def load_control_test_accs(subject_number, chans=None, diagonal=True, missing_f0=False, zscore_to_silence=True):
     """Used to load nonspeech control invariance analysis results.
 
     Args:
@@ -139,17 +146,24 @@ def load_control_test_accs(subject_number, diagonal=True, missing_f0=False):
             * **accs_test** (*ndarray*): shape is (n_chans). Contains accuracy value for nonspeech data. 
     """
     info_str = ""
+    if zscore_to_silence is False:
+        info_str = info_str + "_zscore_block"
     if missing_f0:
         info_str = info_str + "_missing_f0"
     if diagonal:
         info_str = info_str + "_diagonal"
+    if chans is not None:
+        info_str = info_str + "_chans"
     filename = os.path.join(results_path, 'EC' + str(subject_number) + '_control_test_accs' + info_str + '.mat')
     data = sio.loadmat(filename)
-    return data['accs'], data['accs_test']
+    if chans is not None:
+        return data['accs'], data['accs_test'], data['chans']
+    else:
+        return data['accs'], data['accs_test']
 
-def test_invariance_missing_f0(subject_number, solver="lsqr", shrinkage=1, n_perms=1000):
-    Y_mat, sns, sts, sps, Y_mat_plotter = load_Y_mat_sns_sts_sps_for_subject_number(subject_number)
-    Y_mat_c, sns_c, sts_c, sps_c, Y_mat_plotter_c = load_Y_mat_sns_sts_sps_for_subject_number(subject_number, missing_f0_stim=True)
+def test_invariance_missing_f0(subject_number, solver="lsqr", shrinkage=1, n_perms=1000, zscore_to_silence=True, chans=None):
+    Y_mat, sns, sts, sps, Y_mat_plotter = load_Y_mat_sns_sts_sps_for_subject_number(subject_number, zscore_to_silence=zscore_to_silence)
+    Y_mat_c, sns_c, sts_c, sps_c, Y_mat_plotter_c = load_Y_mat_sns_sts_sps_for_subject_number(subject_number, missing_f0_stim=True, zscore_to_silence=zscore_to_silence)
 
     Y_all = np.concatenate([Y_mat, Y_mat_c], axis=2)
     bad_time_indexes = np.isnan(np.sum(Y_all, axis=2))
@@ -162,15 +176,10 @@ def test_invariance_missing_f0(subject_number, solver="lsqr", shrinkage=1, n_per
     elif solver == "lsqr":
         lda = LinearDiscriminantAnalysis(solver=solver, shrinkage=shrinkage)
 
-    accs = np.zeros((n_chans, n_perms, 4))
+    accs = np.zeros((n_chans, n_perms, 6))
     accs_test = np.zeros((n_chans, 5))
 
     n_train_100 = len(sts)
-    n_test_f0 = len(sns_c == 1) #2
-    n_test_no_noise = len(sns_c == 0) #3
-    n_test_stretch1 = len(sns_c == 2) #4
-    n_test_stretchp5 = len(sns_c == 3) #5
-    n_test_stretch2 = len(sns_c == 4) #6
 
     n_train_60 = int(np.round(n_train_100*0.6))
     n_train_40 = n_train_100 - n_train_60
@@ -184,50 +193,65 @@ def test_invariance_missing_f0(subject_number, solver="lsqr", shrinkage=1, n_per
     ofs_tests = [ofs0, ofs1, ofs2, ofs3, ofs4]
 
     for chan in np.arange(n_chans):
-        Y_train = Y_mat[chan][~bad_time_indexes[chan]].T
+        if chans is None or chan in chans:
+            Y_train = Y_mat[chan][~bad_time_indexes[chan]].T
 
-        for sn in np.arange(5):
-            Y_test = Y_mat_c[chan][~bad_time_indexes[chan]].T[sns_c == sn]
-            ofs_test = ofs_tests[sn]
+            for sn in np.arange(5):
+                Y_test = Y_mat_c[chan][~bad_time_indexes[chan]].T[sns_c == sn]
+                ofs_test = ofs_tests[sn]
 
-            if Y_train.shape[1] < 1 or Y_test.shape[1] < 1:
-                accs_test[chan, sn] = np.NaN
-            else:
-                lda.fit(Y_train, ofs_train)
-                accs_test[chan, sn] = lda.score(Y_test, ofs_test)
+                if Y_train.shape[1] < 1 or Y_test.shape[1] < 1:
+                    accs_test[chan, sn] = np.NaN
+                else:
+                    lda.fit(Y_train, ofs_train)
+                    accs_test[chan, sn] = lda.score(Y_test, ofs_test)
 
     for p in tqdm(np.arange(n_perms)):
         rand_perm_train = np.random.permutation(n_train_100)
         shuffle_train = np.random.permutation(n_train_100)
 
+        shuffle_nonspeech1 = np.random.permutation(len(ofs1))
+        shuffle_nonspeech2 = np.random.permutation(len(ofs2))
+
         for chan in np.arange(n_chans):
-            Y_train = Y_mat[chan][~bad_time_indexes[chan]].T
+            if chans is None or chan in chans:
+                Y_train = Y_mat[chan][~bad_time_indexes[chan]].T
 
-            if Y_train.shape[1] < 1 or Y_test.shape[1] < 1:
-                accs[chan, p, :] = np.NaN
-            else:
-                lda.fit(Y_train[rand_perm_train][np.arange(n_train_60)], ofs_train[rand_perm_train][np.arange(n_train_60)])
-                Y_speech_test = Y_train[rand_perm_train][np.arange(n_train_60, n_train_100)]
-                Y_speech_shuffle = Y_train[shuffle_train][np.arange(n_train_60, n_train_100)]
-                ofs_train_test = ofs_train[rand_perm_train][np.arange(n_train_60, n_train_100)]
-                
-                
-                sample_inds48 = np.random.randint(0, Y_speech_test.shape[0], size=(48))
-                sample_inds96 = np.random.randint(0, Y_speech_test.shape[0], size=(96))
-                Y_speech_test48 = Y_speech_test[sample_inds48]
-                Y_speech_shuffle48 = Y_speech_shuffle[sample_inds48]
-                ofs_train_test48 = ofs_train_test[sample_inds48]
+                if Y_train.shape[1] < 1 or Y_test.shape[1] < 1:
+                    accs[chan, p, :] = np.NaN
+                else:
+                    lda.fit(Y_train[rand_perm_train][np.arange(n_train_60)], ofs_train[rand_perm_train][np.arange(n_train_60)])
+                    Y_speech_test = Y_train[rand_perm_train][np.arange(n_train_60, n_train_100)]
+                    Y_speech_shuffle = Y_train[shuffle_train][np.arange(n_train_60, n_train_100)]
+                    ofs_train_test = ofs_train[rand_perm_train][np.arange(n_train_60, n_train_100)]
 
-                Y_speech_test96 = Y_speech_test[sample_inds96]
-                Y_speech_shuffle96 = Y_speech_shuffle[sample_inds96]
-                ofs_train_test96 = ofs_train_test[sample_inds96]
+                    sample_inds48 = np.random.randint(0, Y_speech_test.shape[0], size=(48))
+                    sample_inds96 = np.random.randint(0, Y_speech_test.shape[0], size=(96))
+                    Y_speech_test48 = Y_speech_test[sample_inds48]
+                    Y_speech_shuffle48 = Y_speech_shuffle[sample_inds48]
+                    ofs_train_test48 = ofs_train_test[sample_inds48]
 
-                accs[chan, p, 0] = lda.score(Y_speech_test48, ofs_train_test48)
-                accs[chan, p, 1] = lda.score(Y_speech_shuffle48, ofs_train_test48)
-                accs[chan, p, 2] = lda.score(Y_speech_test96, ofs_train_test96)
-                accs[chan, p, 3] = lda.score(Y_speech_shuffle96, ofs_train_test96)
+                    Y_speech_test96 = Y_speech_test[sample_inds96]
+                    Y_speech_shuffle96 = Y_speech_shuffle[sample_inds96]
+                    ofs_train_test96 = ofs_train_test[sample_inds96]
 
-    return accs, accs_test
+                    accs[chan, p, 0] = lda.score(Y_speech_test48, ofs_train_test48)
+                    accs[chan, p, 1] = lda.score(Y_speech_shuffle48, ofs_train_test48)
+                    accs[chan, p, 2] = lda.score(Y_speech_test96, ofs_train_test96)
+                    accs[chan, p, 3] = lda.score(Y_speech_shuffle96, ofs_train_test96)
+
+                    Y_nonspeech1 = Y_mat_c[chan][~bad_time_indexes[chan]].T[sns_c == 1]
+                    Y_nonspeech2 = Y_mat_c[chan][~bad_time_indexes[chan]].T[sns_c == 2]
+                    ofs1_shuffle = ofs1[shuffle_nonspeech1]
+                    ofs2_shuffle = ofs2[shuffle_nonspeech2]
+
+                    accs[chan, p, 4] = lda.score(Y_nonspeech1, ofs1_shuffle)
+                    accs[chan, p, 5] = lda.score(Y_nonspeech2, ofs2_shuffle)
+
+    if chans is not None:
+        return accs, accs_test, chans
+    else:
+        return accs, accs_test
 
 def test_invariance(Y_mat, sns, sts, sps, of_what="st", to_what="sn", n_perms=1000, solver="svd", shrinkage=1):
     bad_time_indexes = np.isnan(np.sum(Y_mat, axis=2))
