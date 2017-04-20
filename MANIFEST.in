@@ -1,0 +1,19 @@
+include intonatang/data/brain_imaging/EC113*
+graft intonatang/data/subject_data/EC113
+graft intonatang/data/timit
+graft intonatang/data/timit_pitch
+graft intonatang/data/timit_tokens
+graft intonatang/data/tokens
+graft intonatang/data/tokens_nonspeech
+include intonatang/data/pink_noise.mat
+include intonatang/data/README.md
+
+include intonatang/processed_neural_data/*.md
+include intonatang/processed_timit_data/*.md
+include intonatang/results/*.md
+
+graft docs
+prune docs/build
+
+include environment.yml
+include requirements.txt
