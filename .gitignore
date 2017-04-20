@@ -10,7 +10,7 @@ build/
 .dropbox
 
 .DS_Store
-Icon
+Icon?
 
 intonatang/data/brain_imaging/*.png
 intonatang/data/brain_imaging/*.mat
@@ -25,5 +25,3 @@ intonatang/data/tokens_nonspeech/*.wav
 intonatang/processed_neural_data/*.mat
 intonatang/processed_timit_data/*.h5
 intonatang/results/*.mat
-
-docs/build/
