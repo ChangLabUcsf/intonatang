@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Encoding and Variance Partitioning Analysis &mdash; Intonatang 2017.1.17 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2017.1.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Intonatang 2017.1.17 documentation" href="index.html" />
+    <link rel="next" title="Invariance analysis" href="invariance.html" />
+    <link rel="prev" title="Pre-analysis" href="preanalysis.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="invariance.html" title="Invariance analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="preanalysis.html" title="Pre-analysis"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="encoding-and-variance-partitioning-analysis">
+<h1>Encoding and Variance Partitioning Analysis<a class="headerlink" href="#encoding-and-variance-partitioning-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Code for single electrode encoding and variance partitioning analysis. Stimuli were designed to independently vary intonation, phonetics, and speaker.
+Encoding analyses are equivalent to three-way ANOVA with intonation, sentence, and speaker as the three factors. Each of these categorical variables
+were coded as dichotomous variables using the simple coding method where regression weights can be interpreted as difference from a reference level of each categorical variable and the intercept
+is equal to grand mean over all trials.</p>
+<span class="target" id="module-intonatang.intonation_encoding"></span><dl class="function">
+<dt id="intonatang.intonation_encoding.dummy_code">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">dummy_code</code><span class="sig-paren">(</span><em>sns</em>, <em>sts</em>, <em>speakers</em>, <em>kind='simple'</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.dummy_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to code categorical variables of sentence, intonation, and speaker.</p>
+<p>Simple coding means each condition is compared to a reference level with the intercept
+being the grand mean. Here, the reference levels are the Neutral condition (st == 1) for
+intonation, sentence 1 (sn == 1) for sentence, and speaker 3 (sp == 3) for speaker.</p>
+<dl class="docutils">
+<dt>The total number of independent variables is 48:</dt>
+<dd>intercept             1
+sentence (sn)   4-1 = 3
+intonation (st) 4-1 = 3
+speaker (sp)    3-1 = 2
+sn x st         3*3 = 9
+sn x sp         3*2 = 6
+st x sp         3*2 = 6
+sn x st x sp  3*3*2 = 18</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sns</strong> (<em>list</em>) &#8211; list of sentence conditions (1, 2, 3, 4)</li>
+<li><strong>sts</strong> (<em>list</em>) &#8211; list of intonation conditions (1, 2, 3, 4)</li>
+<li><strong>sps</strong> (<em>list</em>) &#8211; list of speaker conditions (1, 2, 3)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li>x with dimensions  (n_trials x 48)</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ndarray)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.dummy_code_control">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">dummy_code_control</code><span class="sig-paren">(</span><em>sns</em>, <em>sts</em>, <em>speakers</em>, <em>kind='simple'</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.dummy_code_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to code categorical variables in non-speech control task</p>
+<dl class="docutils">
+<dt>The total number of independent variables here is 40:</dt>
+<dd>intercept             1
+sentence (sn)   5-1 = 4
+intonation (st) 4-1 = 3
+speaker (sp)    2-1 = 1
+sn x st         4*3 = 12
+sn x sp         4*1 = 4
+st x sp         3*1 = 3
+sn x st x sp  4*3*2 = 12</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sns</strong> (<em>list</em>) &#8211; list of sentence conditions (1, 2, 3, 4, 5)</li>
+<li><strong>sts</strong> (<em>list</em>) &#8211; list of intonation conditions (1, 2, 3, 4)</li>
+<li><strong>sps</strong> (<em>list</em>) &#8211; list of speaker conditions (1, 2)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li>x with dimensions (n_trials x 40)</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(ndarray)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.dummy_code_varpart">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">dummy_code_varpart</code><span class="sig-paren">(</span><em>sns</em>, <em>sts</em>, <em>speakers</em>, <em>to_exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.dummy_code_varpart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns subsets of coded variables for variance partitioning analysis</p>
+<p>to_exclude can be one of the seven following strings:
+[&#8220;sn&#8221;, &#8220;st&#8221;, &#8220;sp&#8221;, &#8220;sn st&#8221;, &#8220;sn sp&#8221;, &#8220;st sp&#8221;, &#8220;sn st sp&#8221;]</p>
+<p>&#8220;sn&#8221;, &#8220;st&#8221;, and &#8220;sp&#8221; each exclude the variables coding for the main effect of sentence,
+intonation, and speaker, respectively.</p>
+<p>&#8220;sn st&#8221;, &#8220;sn sp&#8221;, &#8220;st sp&#8221;, and &#8220;sn st sp&#8221; each exclude the variables coding for each pairwise
+and the three-way interaction.</p>
+<p>This function can&#8217;t be used to exclude more than one group of predictor variables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>to_exclude</strong> (<em>str</em>) &#8211; which predictor group to exclude</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.dummy_code_varpart_control">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">dummy_code_varpart_control</code><span class="sig-paren">(</span><em>sns</em>, <em>sts</em>, <em>speakers</em>, <em>to_exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.dummy_code_varpart_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns subsets of coded variables for variance partitioning analysis for non-speech control</p>
+<p>See docstring/documentation for dummy_code_varpart for more information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>to_exclude</strong> (<em>str</em>) &#8211; which predictor group to exclude</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.encoding_varpart_permutation_test">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">encoding_varpart_permutation_test</code><span class="sig-paren">(</span><em>Y_mat</em>, <em>sns</em>, <em>sts</em>, <em>sps</em>, <em>n_perms=250</em>, <em>which_chans=array([  0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39</em>, <em>40</em>, <em>41</em>, <em>42</em>, <em>43</em>, <em>44</em>, <em>45</em>, <em>46</em>, <em>47</em>, <em>48</em>, <em>49</em>, <em>50</em>, <em>51</em>, <em>52</em>, <em>53</em>, <em>54</em>, <em>55</em>, <em>56</em>, <em>57</em>, <em>58</em>, <em>59</em>, <em>60</em>, <em>61</em>, <em>62</em>, <em>63</em>, <em>64</em>, <em>65</em>, <em>66</em>, <em>67</em>, <em>68</em>, <em>69</em>, <em>70</em>, <em>71</em>, <em>72</em>, <em>73</em>, <em>74</em>, <em>75</em>, <em>76</em>, <em>77</em>, <em>78</em>, <em>79</em>, <em>80</em>, <em>81</em>, <em>82</em>, <em>83</em>, <em>84</em>, <em>85</em>, <em>86</em>, <em>87</em>, <em>88</em>, <em>89</em>, <em>90</em>, <em>91</em>, <em>92</em>, <em>93</em>, <em>94</em>, <em>95</em>, <em>96</em>, <em>97</em>, <em>98</em>, <em>99</em>, <em>100</em>, <em>101</em>, <em>102</em>, <em>103</em>, <em>104</em>, <em>105</em>, <em>106</em>, <em>107</em>, <em>108</em>, <em>109</em>, <em>110</em>, <em>111</em>, <em>112</em>, <em>113</em>, <em>114</em>, <em>115</em>, <em>116</em>, <em>117</em>, <em>118</em>, <em>119</em>, <em>120</em>, <em>121</em>, <em>122</em>, <em>123</em>, <em>124</em>, <em>125</em>, <em>126</em>, <em>127</em>, <em>128</em>, <em>129</em>, <em>130</em>, <em>131</em>, <em>132</em>, <em>133</em>, <em>134</em>, <em>135</em>, <em>136</em>, <em>137</em>, <em>138</em>, <em>139</em>, <em>140</em>, <em>141</em>, <em>142</em>, <em>143</em>, <em>144</em>, <em>145</em>, <em>146</em>, <em>147</em>, <em>148</em>, <em>149</em>, <em>150</em>, <em>151</em>, <em>152</em>, <em>153</em>, <em>154</em>, <em>155</em>, <em>156</em>, <em>157</em>, <em>158</em>, <em>159</em>, <em>160</em>, <em>161</em>, <em>162</em>, <em>163</em>, <em>164</em>, <em>165</em>, <em>166</em>, <em>167</em>, <em>168</em>, <em>169</em>, <em>170</em>, <em>171</em>, <em>172</em>, <em>173</em>, <em>174</em>, <em>175</em>, <em>176</em>, <em>177</em>, <em>178</em>, <em>179</em>, <em>180</em>, <em>181</em>, <em>182</em>, <em>183</em>, <em>184</em>, <em>185</em>, <em>186</em>, <em>187</em>, <em>188</em>, <em>189</em>, <em>190</em>, <em>191</em>, <em>192</em>, <em>193</em>, <em>194</em>, <em>195</em>, <em>196</em>, <em>197</em>, <em>198</em>, <em>199</em>, <em>200</em>, <em>201</em>, <em>202</em>, <em>203</em>, <em>204</em>, <em>205</em>, <em>206</em>, <em>207</em>, <em>208</em>, <em>209</em>, <em>210</em>, <em>211</em>, <em>212</em>, <em>213</em>, <em>214</em>, <em>215</em>, <em>216</em>, <em>217</em>, <em>218</em>, <em>219</em>, <em>220</em>, <em>221</em>, <em>222</em>, <em>223</em>, <em>224</em>, <em>225</em>, <em>226</em>, <em>227</em>, <em>228</em>, <em>229</em>, <em>230</em>, <em>231</em>, <em>232</em>, <em>233</em>, <em>234</em>, <em>235</em>, <em>236</em>, <em>237</em>, <em>238</em>, <em>239</em>, <em>240</em>, <em>241</em>, <em>242</em>, <em>243</em>, <em>244</em>, <em>245</em>, <em>246</em>, <em>247</em>, <em>248</em>, <em>249</em>, <em>250</em>, <em>251</em>, <em>252</em>, <em>253</em>, <em>254</em>, <em>255])</em>, <em>use_adj_r2=True</em>, <em>control_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.encoding_varpart_permutation_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs a permutation test on variance partitioning analysis by shuffling trials. Uses single_electrode_encoding_varpart.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.get_xs_dummy_code_varpart">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">get_xs_dummy_code_varpart</code><span class="sig-paren">(</span><em>sns</em>, <em>sts</em>, <em>speakers</em>, <em>control_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.get_xs_dummy_code_varpart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of xs for variance partitioning analysis.</p>
+<p>Each item in xs contains predictors variables that exclude one group of predictor variables,
+except the last item in xs which contains all predictor variables (full model with main effects,
+all pairwise, and three-way interaction)</p>
+<p>xs = [x_wo_sn, x_wo_st, x_wo_sp, x_wo_sn_st, x_wo_sn_sp, x_wo_st_sp, x_wo_sn_st_sp, x_all]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.single_electrode_encoding">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">single_electrode_encoding</code><span class="sig-paren">(</span><em>Y_mat</em>, <em>xs</em>, <em>which_chans=array([  0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39</em>, <em>40</em>, <em>41</em>, <em>42</em>, <em>43</em>, <em>44</em>, <em>45</em>, <em>46</em>, <em>47</em>, <em>48</em>, <em>49</em>, <em>50</em>, <em>51</em>, <em>52</em>, <em>53</em>, <em>54</em>, <em>55</em>, <em>56</em>, <em>57</em>, <em>58</em>, <em>59</em>, <em>60</em>, <em>61</em>, <em>62</em>, <em>63</em>, <em>64</em>, <em>65</em>, <em>66</em>, <em>67</em>, <em>68</em>, <em>69</em>, <em>70</em>, <em>71</em>, <em>72</em>, <em>73</em>, <em>74</em>, <em>75</em>, <em>76</em>, <em>77</em>, <em>78</em>, <em>79</em>, <em>80</em>, <em>81</em>, <em>82</em>, <em>83</em>, <em>84</em>, <em>85</em>, <em>86</em>, <em>87</em>, <em>88</em>, <em>89</em>, <em>90</em>, <em>91</em>, <em>92</em>, <em>93</em>, <em>94</em>, <em>95</em>, <em>96</em>, <em>97</em>, <em>98</em>, <em>99</em>, <em>100</em>, <em>101</em>, <em>102</em>, <em>103</em>, <em>104</em>, <em>105</em>, <em>106</em>, <em>107</em>, <em>108</em>, <em>109</em>, <em>110</em>, <em>111</em>, <em>112</em>, <em>113</em>, <em>114</em>, <em>115</em>, <em>116</em>, <em>117</em>, <em>118</em>, <em>119</em>, <em>120</em>, <em>121</em>, <em>122</em>, <em>123</em>, <em>124</em>, <em>125</em>, <em>126</em>, <em>127</em>, <em>128</em>, <em>129</em>, <em>130</em>, <em>131</em>, <em>132</em>, <em>133</em>, <em>134</em>, <em>135</em>, <em>136</em>, <em>137</em>, <em>138</em>, <em>139</em>, <em>140</em>, <em>141</em>, <em>142</em>, <em>143</em>, <em>144</em>, <em>145</em>, <em>146</em>, <em>147</em>, <em>148</em>, <em>149</em>, <em>150</em>, <em>151</em>, <em>152</em>, <em>153</em>, <em>154</em>, <em>155</em>, <em>156</em>, <em>157</em>, <em>158</em>, <em>159</em>, <em>160</em>, <em>161</em>, <em>162</em>, <em>163</em>, <em>164</em>, <em>165</em>, <em>166</em>, <em>167</em>, <em>168</em>, <em>169</em>, <em>170</em>, <em>171</em>, <em>172</em>, <em>173</em>, <em>174</em>, <em>175</em>, <em>176</em>, <em>177</em>, <em>178</em>, <em>179</em>, <em>180</em>, <em>181</em>, <em>182</em>, <em>183</em>, <em>184</em>, <em>185</em>, <em>186</em>, <em>187</em>, <em>188</em>, <em>189</em>, <em>190</em>, <em>191</em>, <em>192</em>, <em>193</em>, <em>194</em>, <em>195</em>, <em>196</em>, <em>197</em>, <em>198</em>, <em>199</em>, <em>200</em>, <em>201</em>, <em>202</em>, <em>203</em>, <em>204</em>, <em>205</em>, <em>206</em>, <em>207</em>, <em>208</em>, <em>209</em>, <em>210</em>, <em>211</em>, <em>212</em>, <em>213</em>, <em>214</em>, <em>215</em>, <em>216</em>, <em>217</em>, <em>218</em>, <em>219</em>, <em>220</em>, <em>221</em>, <em>222</em>, <em>223</em>, <em>224</em>, <em>225</em>, <em>226</em>, <em>227</em>, <em>228</em>, <em>229</em>, <em>230</em>, <em>231</em>, <em>232</em>, <em>233</em>, <em>234</em>, <em>235</em>, <em>236</em>, <em>237</em>, <em>238</em>, <em>239</em>, <em>240</em>, <em>241</em>, <em>242</em>, <em>243</em>, <em>244</em>, <em>245</em>, <em>246</em>, <em>247</em>, <em>248</em>, <em>249</em>, <em>250</em>, <em>251</em>, <em>252</em>, <em>253</em>, <em>254</em>, <em>255])</em>, <em>use_adj_r2=True</em>, <em>return_weights=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.single_electrode_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Y_mat: n_chans x n_timepoints x n_trials.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.single_electrode_encoding_all_weights">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">single_electrode_encoding_all_weights</code><span class="sig-paren">(</span><em>Y_mat</em>, <em>sns</em>, <em>sts</em>, <em>speakers</em>, <em>which_chans=array([  0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39</em>, <em>40</em>, <em>41</em>, <em>42</em>, <em>43</em>, <em>44</em>, <em>45</em>, <em>46</em>, <em>47</em>, <em>48</em>, <em>49</em>, <em>50</em>, <em>51</em>, <em>52</em>, <em>53</em>, <em>54</em>, <em>55</em>, <em>56</em>, <em>57</em>, <em>58</em>, <em>59</em>, <em>60</em>, <em>61</em>, <em>62</em>, <em>63</em>, <em>64</em>, <em>65</em>, <em>66</em>, <em>67</em>, <em>68</em>, <em>69</em>, <em>70</em>, <em>71</em>, <em>72</em>, <em>73</em>, <em>74</em>, <em>75</em>, <em>76</em>, <em>77</em>, <em>78</em>, <em>79</em>, <em>80</em>, <em>81</em>, <em>82</em>, <em>83</em>, <em>84</em>, <em>85</em>, <em>86</em>, <em>87</em>, <em>88</em>, <em>89</em>, <em>90</em>, <em>91</em>, <em>92</em>, <em>93</em>, <em>94</em>, <em>95</em>, <em>96</em>, <em>97</em>, <em>98</em>, <em>99</em>, <em>100</em>, <em>101</em>, <em>102</em>, <em>103</em>, <em>104</em>, <em>105</em>, <em>106</em>, <em>107</em>, <em>108</em>, <em>109</em>, <em>110</em>, <em>111</em>, <em>112</em>, <em>113</em>, <em>114</em>, <em>115</em>, <em>116</em>, <em>117</em>, <em>118</em>, <em>119</em>, <em>120</em>, <em>121</em>, <em>122</em>, <em>123</em>, <em>124</em>, <em>125</em>, <em>126</em>, <em>127</em>, <em>128</em>, <em>129</em>, <em>130</em>, <em>131</em>, <em>132</em>, <em>133</em>, <em>134</em>, <em>135</em>, <em>136</em>, <em>137</em>, <em>138</em>, <em>139</em>, <em>140</em>, <em>141</em>, <em>142</em>, <em>143</em>, <em>144</em>, <em>145</em>, <em>146</em>, <em>147</em>, <em>148</em>, <em>149</em>, <em>150</em>, <em>151</em>, <em>152</em>, <em>153</em>, <em>154</em>, <em>155</em>, <em>156</em>, <em>157</em>, <em>158</em>, <em>159</em>, <em>160</em>, <em>161</em>, <em>162</em>, <em>163</em>, <em>164</em>, <em>165</em>, <em>166</em>, <em>167</em>, <em>168</em>, <em>169</em>, <em>170</em>, <em>171</em>, <em>172</em>, <em>173</em>, <em>174</em>, <em>175</em>, <em>176</em>, <em>177</em>, <em>178</em>, <em>179</em>, <em>180</em>, <em>181</em>, <em>182</em>, <em>183</em>, <em>184</em>, <em>185</em>, <em>186</em>, <em>187</em>, <em>188</em>, <em>189</em>, <em>190</em>, <em>191</em>, <em>192</em>, <em>193</em>, <em>194</em>, <em>195</em>, <em>196</em>, <em>197</em>, <em>198</em>, <em>199</em>, <em>200</em>, <em>201</em>, <em>202</em>, <em>203</em>, <em>204</em>, <em>205</em>, <em>206</em>, <em>207</em>, <em>208</em>, <em>209</em>, <em>210</em>, <em>211</em>, <em>212</em>, <em>213</em>, <em>214</em>, <em>215</em>, <em>216</em>, <em>217</em>, <em>218</em>, <em>219</em>, <em>220</em>, <em>221</em>, <em>222</em>, <em>223</em>, <em>224</em>, <em>225</em>, <em>226</em>, <em>227</em>, <em>228</em>, <em>229</em>, <em>230</em>, <em>231</em>, <em>232</em>, <em>233</em>, <em>234</em>, <em>235</em>, <em>236</em>, <em>237</em>, <em>238</em>, <em>239</em>, <em>240</em>, <em>241</em>, <em>242</em>, <em>243</em>, <em>244</em>, <em>245</em>, <em>246</em>, <em>247</em>, <em>248</em>, <em>249</em>, <em>250</em>, <em>251</em>, <em>252</em>, <em>253</em>, <em>254</em>, <em>255])</em>, <em>control_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.single_electrode_encoding_all_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns weights for encoding when using all groups of predictors</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_encoding.single_electrode_encoding_varpart">
+<code class="descclassname">intonatang.intonation_encoding.</code><code class="descname">single_electrode_encoding_varpart</code><span class="sig-paren">(</span><em>Y_mat</em>, <em>sns</em>, <em>sts</em>, <em>sps</em>, <em>which_chans=array([  0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39</em>, <em>40</em>, <em>41</em>, <em>42</em>, <em>43</em>, <em>44</em>, <em>45</em>, <em>46</em>, <em>47</em>, <em>48</em>, <em>49</em>, <em>50</em>, <em>51</em>, <em>52</em>, <em>53</em>, <em>54</em>, <em>55</em>, <em>56</em>, <em>57</em>, <em>58</em>, <em>59</em>, <em>60</em>, <em>61</em>, <em>62</em>, <em>63</em>, <em>64</em>, <em>65</em>, <em>66</em>, <em>67</em>, <em>68</em>, <em>69</em>, <em>70</em>, <em>71</em>, <em>72</em>, <em>73</em>, <em>74</em>, <em>75</em>, <em>76</em>, <em>77</em>, <em>78</em>, <em>79</em>, <em>80</em>, <em>81</em>, <em>82</em>, <em>83</em>, <em>84</em>, <em>85</em>, <em>86</em>, <em>87</em>, <em>88</em>, <em>89</em>, <em>90</em>, <em>91</em>, <em>92</em>, <em>93</em>, <em>94</em>, <em>95</em>, <em>96</em>, <em>97</em>, <em>98</em>, <em>99</em>, <em>100</em>, <em>101</em>, <em>102</em>, <em>103</em>, <em>104</em>, <em>105</em>, <em>106</em>, <em>107</em>, <em>108</em>, <em>109</em>, <em>110</em>, <em>111</em>, <em>112</em>, <em>113</em>, <em>114</em>, <em>115</em>, <em>116</em>, <em>117</em>, <em>118</em>, <em>119</em>, <em>120</em>, <em>121</em>, <em>122</em>, <em>123</em>, <em>124</em>, <em>125</em>, <em>126</em>, <em>127</em>, <em>128</em>, <em>129</em>, <em>130</em>, <em>131</em>, <em>132</em>, <em>133</em>, <em>134</em>, <em>135</em>, <em>136</em>, <em>137</em>, <em>138</em>, <em>139</em>, <em>140</em>, <em>141</em>, <em>142</em>, <em>143</em>, <em>144</em>, <em>145</em>, <em>146</em>, <em>147</em>, <em>148</em>, <em>149</em>, <em>150</em>, <em>151</em>, <em>152</em>, <em>153</em>, <em>154</em>, <em>155</em>, <em>156</em>, <em>157</em>, <em>158</em>, <em>159</em>, <em>160</em>, <em>161</em>, <em>162</em>, <em>163</em>, <em>164</em>, <em>165</em>, <em>166</em>, <em>167</em>, <em>168</em>, <em>169</em>, <em>170</em>, <em>171</em>, <em>172</em>, <em>173</em>, <em>174</em>, <em>175</em>, <em>176</em>, <em>177</em>, <em>178</em>, <em>179</em>, <em>180</em>, <em>181</em>, <em>182</em>, <em>183</em>, <em>184</em>, <em>185</em>, <em>186</em>, <em>187</em>, <em>188</em>, <em>189</em>, <em>190</em>, <em>191</em>, <em>192</em>, <em>193</em>, <em>194</em>, <em>195</em>, <em>196</em>, <em>197</em>, <em>198</em>, <em>199</em>, <em>200</em>, <em>201</em>, <em>202</em>, <em>203</em>, <em>204</em>, <em>205</em>, <em>206</em>, <em>207</em>, <em>208</em>, <em>209</em>, <em>210</em>, <em>211</em>, <em>212</em>, <em>213</em>, <em>214</em>, <em>215</em>, <em>216</em>, <em>217</em>, <em>218</em>, <em>219</em>, <em>220</em>, <em>221</em>, <em>222</em>, <em>223</em>, <em>224</em>, <em>225</em>, <em>226</em>, <em>227</em>, <em>228</em>, <em>229</em>, <em>230</em>, <em>231</em>, <em>232</em>, <em>233</em>, <em>234</em>, <em>235</em>, <em>236</em>, <em>237</em>, <em>238</em>, <em>239</em>, <em>240</em>, <em>241</em>, <em>242</em>, <em>243</em>, <em>244</em>, <em>245</em>, <em>246</em>, <em>247</em>, <em>248</em>, <em>249</em>, <em>250</em>, <em>251</em>, <em>252</em>, <em>253</em>, <em>254</em>, <em>255])</em>, <em>use_adj_r2=True</em>, <em>control_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_encoding.single_electrode_encoding_varpart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns unique variance of each group of predictors, must use xs from get_xs_dummy_code_varpart</p>
+<p>Calculates difference in explained variance between full model and model excluding one group of predictors.
+The groups of predictors are (sn, st, sp, snxst, snxsp, stxsp, snxstxsp), where x indicates interaction
+terms. The p_values returned take into account the number of variables in each group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Y_mat</strong> (<em>ndarray</em>) &#8211; dimensions are n_chans x n_timepoints x n_trials</li>
+<li><strong>sns</strong> (<em>list</em>) &#8211; list of sentence conditions (n_trials length)</li>
+<li><strong>sts</strong> (<em>list</em>) &#8211; list of intonation conditions (n_trials length)</li>
+<li><strong>sps</strong> (<em>list</em>) &#8211; list of speaker conditions (n_trials length)</li>
+<li><strong>which_chans</strong> (<em>list</em>) &#8211; list of channels to do encoding analysis on</li>
+<li><strong>use_adj_r2</strong> &#8211; use adjusted r2 instead of r2</li>
+<li><strong>control_stim</strong> &#8211; whether analysis is on non-speech control task (changes coding of categorical variables)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>r2s_varpart</strong> (<em>ndarray</em>): dimensions n_chans x n_timepoints x 7 (groups of predictors)</li>
+<li><strong>p_values</strong> (<em>ndarray</em>): dimensions n_chans x n_timepoints x 7</li>
+<li><strong>f_stats</strong> (<em>ndarray</em>): dimensions n_chans x n_timepoints x 7</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="preanalysis.html"
+                        title="previous chapter">Pre-analysis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="invariance.html"
+                        title="next chapter">Invariance analysis</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/encoding.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="invariance.html" title="Invariance analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="preanalysis.html" title="Pre-analysis"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016-2017, Claire Tang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

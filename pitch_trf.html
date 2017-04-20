@@ -1,0 +1,382 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pitch Temporal Receptive Field Analysis &mdash; Intonatang 2017.1.17 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2017.1.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Intonatang 2017.1.17 documentation" href="index.html" />
+    <link rel="prev" title="TIMIT module" href="timit.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="timit.html" title="TIMIT module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-intonatang.pitch_trf">
+<span id="pitch-temporal-receptive-field-analysis"></span><h1>Pitch Temporal Receptive Field Analysis<a class="headerlink" href="#module-intonatang.pitch_trf" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="intonatang.pitch_trf.get_bin_edges_abs_rel">
+<code class="descclassname">intonatang.pitch_trf.</code><code class="descname">get_bin_edges_abs_rel</code><span class="sig-paren">(</span><em>timit_pitch</em>, <em>bins=10</em>, <em>percent=95</em>, <em>pitch_scaling='log'</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.pitch_trf.get_bin_edges_abs_rel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns abs_bin_edges and rel_bin_edges</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.pitch_trf.get_nt_nchans_for_out">
+<code class="descclassname">intonatang.pitch_trf.</code><code class="descname">get_nt_nchans_for_out</code><span class="sig-paren">(</span><em>out</em>, <em>timit_pitch</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.pitch_trf.get_nt_nchans_for_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of time points and channels for one subject</p>
+<p>out is returned from timit.load_h5py_out(subject_number) and contains TIMIT data for one subject.</p>
+<p>This function goes through each TIMIT trial to determine how many timepoints of data are there.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.pitch_trf.get_stim_and_resp_from_pitch_intensity_neural_activity_fold">
+<code class="descclassname">intonatang.pitch_trf.</code><code class="descname">get_stim_and_resp_from_pitch_intensity_neural_activity_fold</code><span class="sig-paren">(</span><em>pitch_intensity</em>, <em>neural_activity</em>, <em>last_indexes</em>, <em>abs_bin_edges</em>, <em>rel_bin_edges</em>, <em>abs_change_bin_edges=None</em>, <em>nbins=10</em>, <em>feat='all'</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.pitch_trf.get_stim_and_resp_from_pitch_intensity_neural_activity_fold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns matrices for independent variables (stimulus features) and dependent variables (neural activity on all channels) for training, hyperparamater optimization, and testing.</p>
+<p>This function further processes the output of get_neural_activity_and_pitch_phonetic_for_fold. Starting with the nt x n_continuous_features matrix of pitch_intensity and
+the n_chans x nt matrix of neural activity, this function produces the matrices representing the binary matrix of binned pitch features as the stim and transposes the neural
+activity to get the resp. These are then split into three matrices along the time dimension.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.pitch_trf.load_timit_shuffled">
+<code class="descclassname">intonatang.pitch_trf.</code><code class="descname">load_timit_shuffled</code><span class="sig-paren">(</span><em>fold=0</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.pitch_trf.load_timit_shuffled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a shuffled version of timit_pitch which was created and saved by randomize_timit_pitch_contours</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.pitch_trf.load_timit_strat">
+<code class="descclassname">intonatang.pitch_trf.</code><code class="descname">load_timit_strat</code><span class="sig-paren">(</span><em>fold=0</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.pitch_trf.load_timit_strat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an ordering of TIMIT sentences so that cross-validation of models will be done with stratification.</p>
+<p>Each of the 25 stratified orderings was generated using code that is available in a Notebook.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.pitch_trf.run_ptrf_analysis_pipeline_for_subject_number">
+<code class="descclassname">intonatang.pitch_trf.</code><code class="descname">run_ptrf_analysis_pipeline_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>pitch_scaling='log'</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.pitch_trf.run_ptrf_analysis_pipeline_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pitch temporal receptive field analysis pipeline.</p>
+<dl class="docutils">
+<dt>The ptrf pipeline consists of:</dt>
+<dd><ol class="first last arabic">
+<li><p class="first">Loading TIMIT data for each subject.</p>
+</li>
+<li><dl class="first docutils">
+<dt>For each of the 25 stratified folds for cross validation:</dt>
+<dd><ul class="first last simple">
+<li>Discretize the pitch features (parameterized from f0 values in Hz in timit.save_timit_pitch) into bins.</li>
+<li>Run ridge regression between stimulus features (pitch bins, and other features like intensity to statistically control for) and neural activity on each electrode.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Save R2 values and weights (which are the temporal receptive fields)</p>
+</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-intonatang.temporal_receptive_field"></span><p>Code for fitting temporal receptive models using Ridge (L2 regularized) regression.</p>
+<p>Given two ndarrays, stim and resp, there are two ways to fit trfs in terms of the cross validation strategy.
+Both CV strategies split the data into three mutually exclusive sets, training, validation (ridge), and test.
+The regression weights are fit to the training data. The best ridge parameter is found by testing on the ridge
+set. The final model performance (correlation between actual and predicted response) is calculated from the
+test set.</p>
+<p>The two strategies are:</p>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Simple KFold: run_cv_temporal_ridge_regression_model</dt>
+<dd><p class="first last">The total samples of the data are split into a (K-1)/K train set, 1/2K ridge set, and 1/2K test set
+K times.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>User-defined: run_cv_temporal_ridge_regression_model_fold</dt>
+<dd><p class="first last">Use this function when you want to specify your own train, ridge, and test sets (e.g. I use this to
+make sure training sets have TIMIT sentences with low-to-high pitch variability so that I don&#8217;t end up
+with a training set that is only low pitch variability or only high pitch variability)</p>
+</dd>
+</dl>
+</li>
+</ol>
+<dl class="function">
+<dt id="intonatang.temporal_receptive_field.get_alphas">
+<code class="descclassname">intonatang.temporal_receptive_field.</code><code class="descname">get_alphas</code><span class="sig-paren">(</span><em>start=2</em>, <em>stop=7</em>, <em>num=10</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.temporal_receptive_field.get_alphas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns alphas from num^start to num^stop in log space.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.temporal_receptive_field.get_delays">
+<code class="descclassname">intonatang.temporal_receptive_field.</code><code class="descname">get_delays</code><span class="sig-paren">(</span><em>delay_seconds=0.4</em>, <em>fs=100</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.temporal_receptive_field.get_delays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns 1d array of delays for a given window (in s). Default sampling frequency (fs) is 100Hz.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.temporal_receptive_field.run_cv_temporal_ridge_regression_model_fold">
+<code class="descclassname">intonatang.temporal_receptive_field.</code><code class="descname">run_cv_temporal_ridge_regression_model_fold</code><span class="sig-paren">(</span><em>stims</em>, <em>resps</em>, <em>delays=array([ 0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39])</em>, <em>alphas=array([  1.00000000e+02</em>, <em>3.59381366e+02</em>, <em>1.29154967e+03</em>, <em>4.64158883e+03</em>, <em>1.66810054e+04</em>, <em>5.99484250e+04</em>, <em>2.15443469e+05</em>, <em>7.74263683e+05</em>, <em>2.78255940e+06</em>, <em>1.00000000e+07])</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.temporal_receptive_field.run_cv_temporal_ridge_regression_model_fold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit trf models with user-given split of data into training, validation, and test.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>stims</strong> (<em>list</em>) &#8211; list of stim data split into training, validation, and test
+i.e. [train_stim, ridge_stim, test_stim] where train_stim is (n_training_samples x n_features)</li>
+<li><strong>resps</strong> (<em>list</em>) &#8211; list of resp data split into training, validation, and test.
+The number of samples in each set should match that for the stims.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>(tuple)</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><strong>test_corr</strong> (<em>ndarray</em>): Correlation between predicted and actual responses on</dt>
+<dd><p class="first last">test set using wts computed for alpha with best performance on validation set.
+Shape of test_corr is (n_chans)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>wts</strong> (<em>ndarray</em>): Computed regression weights using best alpha from testing on</dt>
+<dd><p class="first last">validation set. Shape of wts is (n_chans, n_features)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.temporal_receptive_field.get_dstim">
+<code class="descclassname">intonatang.temporal_receptive_field.</code><code class="descname">get_dstim</code><span class="sig-paren">(</span><em>stim</em>, <em>delays=array([ 0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39])</em>, <em>add_edges=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.temporal_receptive_field.get_dstim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns stimulus features with given delays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>stim</strong> &#8211; (n_samples, n_features)</li>
+<li><strong>delays</strong> &#8211; list of delays to use, values in delays have units of indices for stim.</li>
+<li><strong>add_edges</strong> &#8211; adds 3 additional delays to both sides of the delays list to account for edge effects in temporal
+receptive fields.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dstim</strong> &#8211; (n_samples, n_features x n_delays (including edge delays if added))</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.temporal_receptive_field.run_cv_temporal_ridge_regression_model">
+<code class="descclassname">intonatang.temporal_receptive_field.</code><code class="descname">run_cv_temporal_ridge_regression_model</code><span class="sig-paren">(</span><em>stim</em>, <em>resp</em>, <em>delays=array([ 0</em>, <em>1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6</em>, <em>7</em>, <em>8</em>, <em>9</em>, <em>10</em>, <em>11</em>, <em>12</em>, <em>13</em>, <em>14</em>, <em>15</em>, <em>16</em>, <em>17</em>, <em>18</em>, <em>19</em>, <em>20</em>, <em>21</em>, <em>22</em>, <em>23</em>, <em>24</em>, <em>25</em>, <em>26</em>, <em>27</em>, <em>28</em>, <em>29</em>, <em>30</em>, <em>31</em>, <em>32</em>, <em>33</em>, <em>34</em>, <em>35</em>, <em>36</em>, <em>37</em>, <em>38</em>, <em>39])</em>, <em>alphas=array([  1.00000000e+02</em>, <em>3.59381366e+02</em>, <em>1.29154967e+03</em>, <em>4.64158883e+03</em>, <em>1.66810054e+04</em>, <em>5.99484250e+04</em>, <em>2.15443469e+05</em>, <em>7.74263683e+05</em>, <em>2.78255940e+06</em>, <em>1.00000000e+07])</em>, <em>n_folds=5</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.temporal_receptive_field.run_cv_temporal_ridge_regression_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given stim and resp, fit temporal receptive fields using ridge regression and KFold cross validation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>stim</strong> &#8211; (n_samples, n_features)</li>
+<li><strong>resp</strong> &#8211; (n_samples, n_chans)</li>
+<li><strong>delays</strong> &#8211; (n_delays)</li>
+<li><strong>alphas</strong> &#8211; (n_alphas)</li>
+<li><strong>n_folds</strong> (<em>int</em>) &#8211; number of folds to use for KFold cross validation. The 1/K fraction of data usually used
+for the test set is split in half for the ridge parameter validation set and the test set.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>(tuple)</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><strong>test_corr_folds</strong> (<em>ndarray</em>): Correlation between predicted and actual responses on</dt>
+<dd><p class="first last">test set using wts computed for alpha with best performance on validation set.
+Shape of test_corr_folds is (n_folds, n_chans)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>wts_folds</strong> (<em>ndarray</em>): Computed regression weights. Shape of wts_folds is</dt>
+<dd><p class="first last">(n_folds, n_features, n_chans)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.temporal_receptive_field.run_ridge_regression">
+<code class="descclassname">intonatang.temporal_receptive_field.</code><code class="descname">run_ridge_regression</code><span class="sig-paren">(</span><em>train_stim</em>, <em>train_resp</em>, <em>ridge_stim</em>, <em>ridge_resp</em>, <em>alphas</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.temporal_receptive_field.run_ridge_regression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs ridge (L2 regularized) regression for ridge parameters in alphas and returns wts fit
+on training data and correlation between actual and predicted on validation data for each alpha.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>train_stim</strong> &#8211; (n_training_samples x n_features)</li>
+<li><strong>train_resp</strong> &#8211; (n_training_samples x n_chans)</li>
+<li><strong>ridge_stim</strong> &#8211; (n_validation_samples x n_features)</li>
+<li><strong>ridge_resp</strong> &#8211; (n_validation_samples x n_chans)</li>
+<li><strong>alphas</strong> &#8211; 1d array with ridge parameters to use</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul>
+<li><dl class="first docutils">
+<dt><strong>wts</strong> (<em>ndarray</em>): Computed regression weights. Shape of wts is</dt>
+<dd><p class="first last">(n_alphas, n_features, n_chans)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>ridge_corrs</strong> (<em>ndarray</em>): Correlation between predicted and actual responses on</dt>
+<dd><p class="first last">ridge validation set. Shape of ridge_corrs is (n_alphas, n_chans)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For multiple regression with stim X and resp y and wts B:</p>
+<ol class="arabic simple">
+<li>XB = y</li>
+<li>X&#8217;XB = X&#8217;y</li>
+<li>B = (X&#8217;X)^-1 X&#8217;y</li>
+</ol>
+<p>Add L2 (Ridge) regularization:</p>
+<ol class="arabic simple" start="4">
+<li>B = (X&#8217;X + aI)^-1 X&#8217;y</li>
+</ol>
+<p>Because covariance X&#8217;X is a real symmetric matrix, we can decompose it to QLQ&#8217;, where
+Q is an orthogonal matrix with the eigenvectors and L is a diagonal matrix with the eigenvalues
+of X&#8217;X. Furthermore, (QLQ&#8217;)^-1 = QL^-1Q&#8217;</p>
+<ol class="arabic simple" start="5">
+<li>B = (QLQ&#8217; + aI)^-1 X&#8217;y</li>
+<li>B = Q (L + aI)^-1 Q&#8217;X&#8217;y</li>
+</ol>
+<p>Variables in code below:</p>
+<ul class="simple">
+<li><cite>covmat</cite> is X&#8217;X</li>
+<li><cite>l</cite> contains the diagonal entries of L</li>
+<li><cite>Q</cite> is Q</li>
+<li><cite>Usr</cite> is Q&#8217;X&#8217;y</li>
+<li><cite>D_inv</cite> is (L + aI)^-1</li>
+</ul>
+<p>The wts (B) can be calculated by the matrix multiplication of [Q, D_inv, Usr]</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timit.html"
+                        title="previous chapter">TIMIT module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pitch_trf.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="timit.html" title="TIMIT module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016-2017, Claire Tang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

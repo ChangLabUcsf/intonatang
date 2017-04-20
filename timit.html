@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TIMIT module &mdash; Intonatang 2017.1.17 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2017.1.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Intonatang 2017.1.17 documentation" href="index.html" />
+    <link rel="next" title="Pitch Temporal Receptive Field Analysis" href="pitch_trf.html" />
+    <link rel="prev" title="Invariance analysis" href="invariance.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pitch_trf.html" title="Pitch Temporal Receptive Field Analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="invariance.html" title="Invariance analysis"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="timit-module">
+<h1>TIMIT module<a class="headerlink" href="#timit-module" title="Permalink to this headline">¶</a></h1>
+<p>The timit module is used for calculating phoneme-related responses, phonetic selectivity, and creating
+data structures used by the pitch temporal receptive field analysis.</p>
+<span class="target" id="module-intonatang.timit"></span><dl class="function">
+<dt id="intonatang.timit.get_average_response_to_phonemes">
+<code class="descclassname">intonatang.timit.</code><code class="descname">get_average_response_to_phonemes</code><span class="sig-paren">(</span><em>out, phoneme_order=['d', 'b', 'g', 'p', 'k', 't', 'jh', 'sh', 'z', 's', 'f', 'th', 'dh', 'v', 'w', 'r', 'l', 'ae', 'aa', 'ay', 'aw', 'ow', 'ax', 'uw', 'eh', 'ey', 'ih', 'ux', 'iy', 'n', 'm', 'ng']</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.timit.get_average_response_to_phonemes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the average response over all instances of each phoneme in TIMIT</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.timit.save_timit_pitch">
+<code class="descclassname">intonatang.timit.</code><code class="descname">save_timit_pitch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.timit.save_timit_pitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function saves a pandas dataframe of pitch information for TIMIT sentences.</p>
+<p>This script takes the pitch information (fundamental frequency in Hz in 10ms bins)
+written in <a href="#id1"><span class="problematic" id="id2">*</span></a>.wav.txt files (which are output from Praat and manually examined for doubling or halving errors),
+and saves timit_pitch, a dataframe that contains absolute and relative pitch values.</p>
+<p>Relative pitch values are computed as a z-score across each sentence&#8217;s absolute pitch values. Absolute pitch values are
+saved with two scalings, one is log Hz and the other is erb-rate. These monotonic, non-linear transformations are based
+on psychophysical data showing that differences in Hz are perceived differently wtih frequency and lead to pitch values
+that are more linear with respect to pitch perception.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.timit.save_timit_pitch_phonetic">
+<code class="descclassname">intonatang.timit.</code><code class="descname">save_timit_pitch_phonetic</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.timit.save_timit_pitch_phonetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function combines timit_pitch with timit_phonemes and needs to be run after save_timit_pitch and save_timit_phonemes</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="invariance.html"
+                        title="previous chapter">Invariance analysis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pitch_trf.html"
+                        title="next chapter">Pitch Temporal Receptive Field Analysis</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/timit.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pitch_trf.html" title="Pitch Temporal Receptive Field Analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="invariance.html" title="Invariance analysis"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016-2017, Claire Tang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

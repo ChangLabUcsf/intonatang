@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Invariance analysis &mdash; Intonatang 2017.1.17 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2017.1.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Intonatang 2017.1.17 documentation" href="index.html" />
+    <link rel="next" title="TIMIT module" href="timit.html" />
+    <link rel="prev" title="Encoding and Variance Partitioning Analysis" href="encoding.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="timit.html" title="TIMIT module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoding.html" title="Encoding and Variance Partitioning Analysis"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="invariance-analysis">
+<h1>Invariance analysis<a class="headerlink" href="#invariance-analysis" title="Permalink to this headline">¶</a></h1>
+<p>To determine whether the pattern of neural activity to different intonation contours is the same across
+different data sets (e.g. speech data vs. nonspeech control data), we used linear discriminant analysis (LDA)
+to fit models to predict intonation contour (i.e. the intonation/sentence_type condition between 1-4) from
+the neural activity time series from each electrode. These models were fit on one data set and tested on another,
+and the performance accuracies of the model on different test sets were compared.</p>
+<span class="target" id="module-intonatang.intonation_invariance"></span><dl class="function">
+<dt id="intonatang.intonation_invariance.load_control_test_accs">
+<code class="descclassname">intonatang.intonation_invariance.</code><code class="descname">load_control_test_accs</code><span class="sig-paren">(</span><em>subject_number</em>, <em>chans=None</em>, <em>diagonal=True</em>, <em>missing_f0=False</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_invariance.load_control_test_accs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to load nonspeech control invariance analysis results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject_number</strong> &#8211; xxx in ECxxx</li>
+<li><strong>diagonal</strong> (<em>bool</em>) &#8211; whether the invariance analysis used a shrinkage of 1 and was diagonal LDA.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul>
+<li><dl class="first docutils">
+<dt><strong>accs</strong> (<em>ndarray</em>): shape is (n_chans x n_perms x 3). The last dimension contains accuracy values for held out</dt>
+<dd><p class="first last">speech data, shuffled speech data, and shuffled nonspeech data</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>accs_test</strong> (<em>ndarray</em>): shape is (n_chans). Contains accuracy value for nonspeech data.</p>
+</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_invariance.save_control_test_accs">
+<code class="descclassname">intonatang.intonation_invariance.</code><code class="descname">save_control_test_accs</code><span class="sig-paren">(</span><em>subject_number</em>, <em>accs</em>, <em>accs_test</em>, <em>chans=None</em>, <em>diagonal=True</em>, <em>missing_f0=False</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_invariance.save_control_test_accs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to save the nonspeech control invariance analysis results.</p>
+<p>After running <code class="docutils literal"><span class="pre">test_invariance_control</span></code>, save <code class="docutils literal"><span class="pre">accs</span></code> and <code class="docutils literal"><span class="pre">accs_test</span></code> for a subject.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject_number</strong> &#8211; xxx in ECxxx</li>
+<li><strong>accs</strong> (<em>ndarray</em>) &#8211; shape is (n_chans x n_perms x 3). The last dimension contains accuracy values for held out
+speech data, shuffled speech data, and shuffled nonspeech data</li>
+<li><strong>accs_test</strong> (<em>ndarray</em>) &#8211; shape is (n_chans). Contains accuracy value for nonspeech data.</li>
+<li><strong>diagonal</strong> (<em>bool</em>) &#8211; whether the invariance analysis used a shrinkage of 1 and was diagonal LDA.</li>
+<li><strong>missing_f0</strong> (<em>bool</em>) &#8211; missing f0 invariance analysis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_invariance.test_invariance_control">
+<code class="descclassname">intonatang.intonation_invariance.</code><code class="descname">test_invariance_control</code><span class="sig-paren">(</span><em>subject_number</em>, <em>solver='lsqr'</em>, <em>shrinkage=1</em>, <em>n_perms=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_invariance.test_invariance_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the LDA invariance analysis on nonspeech control data.</p>
+<p>This function contains the pipeline for the nonspeech invariance analysis. Here, we use LDA to fit a model on the
+neural activity time series to predict intonation condition using speech data. We then test this model on both held
+out speech data and the nonspeech control data. The accuracies for the model on the held out speech data and nonspeech
+data are then returned and can be saved with <code class="docutils literal"><span class="pre">save_control_test_accs</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject_number</strong> &#8211; xxx in ECxxx</li>
+<li><strong>solver</strong> &#8211; The type of solver to use for LDA. Can be &#8220;svd&#8221; or &#8220;lsqr&#8221;. Only &#8220;lsqr&#8221; supports shrinkage/regularization.</li>
+<li><strong>shrinkage</strong> &#8211; The shrinkage parameter between 0 and 1. Default of 1 is diagonal LDA.</li>
+<li><strong>n_perms</strong> &#8211; The number of permutations for held out speech data to run.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul>
+<li><dl class="first docutils">
+<dt><strong>accs</strong> (<em>ndarray</em>): shape is (n_chans x n_perms x 3). The last dimension contains accuracy values for held out</dt>
+<dd><p class="first last">speech data, shuffled speech data, and shuffled nonspeech data</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>accs_test</strong> (<em>ndarray</em>): shape is (n_chans). Contains accuracy value for nonspeech data.</p>
+</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoding.html"
+                        title="previous chapter">Encoding and Variance Partitioning Analysis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="timit.html"
+                        title="next chapter">TIMIT module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/invariance.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="timit.html" title="TIMIT module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoding.html" title="Encoding and Variance Partitioning Analysis"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016-2017, Claire Tang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

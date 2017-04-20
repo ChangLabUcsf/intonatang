@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Subject metadata &mdash; Intonatang 2017.1.17 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2017.1.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Intonatang 2017.1.17 documentation" href="index.html" />
+    <link rel="next" title="Pre-analysis" href="preanalysis.html" />
+    <link rel="prev" title="Intonatang entrypoint" href="intonatang_main.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="preanalysis.html" title="Pre-analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intonatang_main.html" title="Intonatang entrypoint"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="subject-metadata">
+<h1>Subject metadata<a class="headerlink" href="#subject-metadata" title="Permalink to this headline">¶</a></h1>
+<p>Information about which blocks were collected for each subject and the stimulus set that was played
+during the block is contained in <code class="docutils literal"><span class="pre">intonation_subject_metadata.py</span></code>.</p>
+<p>Other information about each subject will also be added to this page.</p>
+<span class="target" id="module-intonatang.intonation_subject_data"></span><dl class="function">
+<dt id="intonatang.intonation_subject_data.get_blocks_for_subject_number">
+<code class="descclassname">intonatang.intonation_subject_data.</code><code class="descname">get_blocks_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_subject_data.get_blocks_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of block numbers for each subject.</p>
+<p>Order of blocks is chronological and matched with list of stims returned from get_stims_for_subject_number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject_number</strong> &#8211; xxx in ECxxx</li>
+<li><strong>control_stim</strong> &#8211; flag for getting data from non-speech blocks</li>
+<li><strong>missing_f0_stim</strong> &#8211; flag for getting data from missing_f0 blocks</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_subject_data.get_sentence_numbers_sentence_types_speakers_for_stims_list">
+<code class="descclassname">intonatang.intonation_subject_data.</code><code class="descname">get_sentence_numbers_sentence_types_speakers_for_stims_list</code><span class="sig-paren">(</span><em>stims_list</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_subject_data.get_sentence_numbers_sentence_types_speakers_for_stims_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns lists of sentence, intonation, and speaker conditions (integers from 1 to 4, 1 to 4, and 1 to 3, respectively)</p>
+<p>This is a subfunction used to get sns, sts, and sps given a list of stims.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>stims_list</strong> &#8211; returned from get_stims_for_subject_number</li>
+<li><strong>control_stim</strong> &#8211; flag for getting data from non-speech blocks</li>
+<li><strong>missing_f0_stim</strong> &#8211; flag for getting data from missing_f0 blocks</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_subject_data.get_stims_for_subject_number">
+<code class="descclassname">intonatang.intonation_subject_data.</code><code class="descname">get_stims_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_subject_data.get_stims_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of stims for each subject.</p>
+<p>Order of stims is matched with order of blocks from get_blocks_for_subject_number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject_number</strong> &#8211; xxx in ECxxx</li>
+<li><strong>control_stim</strong> &#8211; flag for getting data from non-speech blocks</li>
+<li><strong>missing_f0_stim</strong> &#8211; flag for getting data from missing_f0 blocks</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-intonatang.intonation_stims"></span><dl class="function">
+<dt id="intonatang.intonation_stims.get_sn_st_sp_from_purr_stims">
+<code class="descclassname">intonatang.intonation_stims.</code><code class="descname">get_sn_st_sp_from_purr_stims</code><span class="sig-paren">(</span><em>stims</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_stims.get_sn_st_sp_from_purr_stims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns ndarrays of sentence, intonation, and speaker conditions for a given list of control (purr) stims.</p>
+<p>For this set of non-speech controls, sentence conditions refer to different amplitude contours, taken to match
+the amplitude contours of the sentence conditions in the speech stimuli.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_stims.get_sn_st_sp_from_stims">
+<code class="descclassname">intonatang.intonation_stims.</code><code class="descname">get_sn_st_sp_from_stims</code><span class="sig-paren">(</span><em>stims</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_stims.get_sn_st_sp_from_stims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns ndarrays of sentence, intonation, and speaker conditions for a given list of stims.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_stims.get_sn_st_sp_from_missing_f0_stims">
+<code class="descclassname">intonatang.intonation_stims.</code><code class="descname">get_sn_st_sp_from_missing_f0_stims</code><span class="sig-paren">(</span><em>stims</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_stims.get_sn_st_sp_from_missing_f0_stims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns ndarrays of intonation and speaker conditions for a given list of missing f0 stims.</p>
+<p>For this set of non-speech controls, sentence conditions do not relate to sentence conditions for other sets of stimuli.
+The sentence condition here refers to the type of missing fundamental control.</p>
+<p>sn: composition of stimulus (h: harmonic, f0: fundamental frequency, noise: pink noise masker, stretch: factor the pitch range was changed by)
+0: 4h + 5h + 6h, stretch = 1
+1: f0 + 2h + 3h, stretch = 1
+2: 4h + 5h + 6h + noise, stretch = 1
+3: 4h + 5h + 6h + noise, stretch = 0.5
+4: 4h + 5h + 6h + noise, stretch = 2</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intonatang_main.html"
+                        title="previous chapter">Intonatang entrypoint</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="preanalysis.html"
+                        title="next chapter">Pre-analysis</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/subject_metadata.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="preanalysis.html" title="Pre-analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intonatang_main.html" title="Intonatang entrypoint"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016-2017, Claire Tang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

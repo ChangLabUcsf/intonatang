@@ -1,0 +1,467 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pre-analysis &mdash; Intonatang 2017.1.17 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2017.1.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Intonatang 2017.1.17 documentation" href="index.html" />
+    <link rel="next" title="Encoding and Variance Partitioning Analysis" href="encoding.html" />
+    <link rel="prev" title="Subject metadata" href="subject_metadata.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoding.html" title="Encoding and Variance Partitioning Analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="subject_metadata.html" title="Subject metadata"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pre-analysis">
+<h1>Pre-analysis<a class="headerlink" href="#pre-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Pre-analysis is the creation of neural activity ndarrays
+(<code class="docutils literal"><span class="pre">Y_mat</span></code>: with dimensions <code class="docutils literal"><span class="pre">n_chans</span></code> x <code class="docutils literal"><span class="pre">n_timepoints</span></code> x <code class="docutils literal"><span class="pre">n_trials</span></code>)) and lists of stimulus conditions.</p>
+<p>After finding stimulus onset times and putting subject metadata into <code class="docutils literal"><span class="pre">intonation_subject_data.py</span></code>, the pre-analysis
+pipeline can be run with <code class="docutils literal"><span class="pre">save_Y_mat_sns_sts_sps_for_subject_number</span></code>.</p>
+<ol class="arabic">
+<li><p class="first">For each block, find stimulus onsets using cross-correlation between stimulus waveform and recorded speaker/microphone channel (This uses Liberty&#8217;s event dectection code). These are then saved to the .mat file for that block in the variable <code class="docutils literal"><span class="pre">times</span></code>.</p>
+</li>
+<li><p class="first">For each subject, get metadata from <code class="docutils literal"><span class="pre">intonation_subject_data.py</span></code> about what the block numbers were and which stimulus set was played during that block.</p>
+</li>
+<li><p class="first">For each subject, load .mat data (<code class="docutils literal"><span class="pre">hg</span></code>, <code class="docutils literal"><span class="pre">times</span></code>, <code class="docutils literal"><span class="pre">bcs</span></code>, <code class="docutils literal"><span class="pre">badTimeSegments</span></code>) for each of their blocks along with stimulus set information.</p>
+</li>
+<li><dl class="first docutils">
+<dt>To get <code class="docutils literal"><span class="pre">Y_mat</span></code> for each subject:</dt>
+<dd><ul class="first last simple">
+<li>neural activity time-locked to stimulus onset is extracted from the hg time series.</li>
+<li>a moving average is used to reduce the number of samples in time and reduce timepoint by timepoint variability.</li>
+<li>trials that overlap with bad time segments (marked from preprocessing) are excluded.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+<p>At the end of pre-analysis, a Y_mat.mat file is created that contains five variables</p>
+<blockquote>
+<div><ol class="arabic">
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">Y_mat</span></code> (<em>ndarray</em>): ndarray with neural activity that is time-averaged in a moving window. Default settings use a window size of 60ms moving in 30ms steps that</dt>
+<dd><p class="first last">starts with a center of -150ms before stimulus onset (window from -180ms to -130ms) and ends with a center of +2850ms after stimulus onset (+650ms after stimulus offset).</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">sns</span></code> (<em>list</em>): list of sentence conditions which are integers 1, 2, 3, or 4. (or 1, 2, 3, 4, 5 for non-speech control)</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">sts</span></code> (<em>list</em>): list of intonation conditions (sts is short for &#8220;sentence types&#8221;) which are integers 1, 2, 3, or 4 for both speech and non-speech controls.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">sps</span></code> (<em>list</em>): list of speaker conditions which are integers 1, 2, 3 for speech and 1, 2 for non-speech control.</p>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">Y_mat_plotter</span></code> (<em>ndarray</em>): neural activity ndarray used by the Plotter. With default settings, this contains the high-gamma</dt>
+<dd><p class="first last">from 250ms before stimulus onset to 550ms after stimulus offset for a total window duration of 3s (stimulus duration is 2.2s).
+dimensions are <code class="docutils literal"><span class="pre">n_chans</span></code> x <code class="docutils literal"><span class="pre">n_timepoints</span></code> x <code class="docutils literal"><span class="pre">n_trials</span></code></p>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<p>Two toggleable options for generating the Y_mat.mat files using <code class="docutils literal"><span class="pre">save_Y_mat_sns_sts_sps_for_subject_number</span></code> are the two parameters:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first"><code class="docutils literal"><span class="pre">control_stim</span></code> (<em>bool</em>): whether to generate the Y_mat.mat file for this subject&#8217;s non-speech control blocks.</p>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal"><span class="pre">zscore_to_silence</span></code> (<em>bool</em>): whether to z-score neural activity to a silent baseline (otherwise z-score to the entire block).</dt>
+<dd><p class="first last">The silent baseline consists of silent periods within the intertrial interval that exclude the first 500ms after stimulus offset.</p>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<span class="target" id="module-intonatang.intonation_preanalysis"></span><dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_all_good_trials">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_all_good_trials</code><span class="sig-paren">(</span><em>good_trials</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_all_good_trials" title="Permalink to this definition">¶</a></dt>
+<dd><p>From list of good trials for each block, return one list of all good trials.</p>
+<p>The numbers in all_good_trials are used to index into data which is concatenated from all blocks.
+For example, for two blocks with 96 trials in which the first two trials of each block are good,
+all_good_trials would be [0, 1, 96, 97]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>good_trials</strong> (<em>list of lists</em>) &#8211; list of good trials for each block, returned from get_times_hg_for_subject_number</li>
+<li><strong>control_stim</strong> (<em>bool</em>) &#8211; whether using non-speech control stimuli</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>all_good_trials</strong>: one list of all good trials</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_bcs">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_bcs</code><span class="sig-paren">(</span><em>subject_number</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_bcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of all bad channels for each subject</p>
+<p>Bad channels are channels that were bad in at least one block.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_number</strong> (<em>int</em>) &#8211; xx in ECxx</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>bcs</strong>: list of bad channels</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(list of ints)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_centers">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_centers</code><span class="sig-paren">(</span><em>back=15</em>, <em>forward=285</em>, <em>window=6</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_centers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a numpy array of center indexes (no parameters needed for default)</p>
+<p>The returned list of <cite>centers</cite> starts at <cite>-1 * back</cite> and steps every half <cite>window</cite>. <cite>centers</cite> will
+end at <cite>forward</cite> if <cite>forward</cite> can be reached from <cite>-1 * back</cite> in half <cite>window</cite> steps.</p>
+<p>The default arguments (back=15, forward=285, and window=6) returns a length 101 ndarray.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_concatenated_data">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_concatenated_data</code><span class="sig-paren">(</span><em>times_list</em>, <em>hg_list</em>, <em>hz=100</em>, <em>back=0</em>, <em>forward=250</em>, <em>zscore=True</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_concatenated_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use to get time locked activity for multiple blocks.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>times_list</strong> &#8211; list of individual times variables where times[0] are start times_list</li>
+<li><strong>hg_list</strong> &#8211; list of hg for blocks in same order as times_list</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_full_data_path_for_subject_number_and_block">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_full_data_path_for_subject_number_and_block</code><span class="sig-paren">(</span><em>subject_number</em>, <em>block</em>, <em>data_path_different=None</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_full_data_path_for_subject_number_and_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns path to the .mat data for each subject and block combination.</p>
+<p>adds &#8220;ECxx/ECxx_Bxxx/ECxx_Bxxx.mat&#8221; where xx is the subject_number and xxx is the block to the data_path.
+data_path is defined at the top of this file as a global constant.
+A different data path can also be passed in through the parameter data_path_different</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject_number</strong> (<em>int</em>) &#8211; xx in ECxx</li>
+<li><strong>block</strong> (<em>int</em>) &#8211; block number</li>
+<li><strong>data_path_different</strong> (<em>str</em>) &#8211; optional if path to data is not the globally defined data_path</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>full_data_path</strong>: data_path (or data_path_different when passed in) + &#8220;ECxx/ECxx_Bxxx/ECxx_Bxxx.mat&#8221;</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_gcs">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_gcs</code><span class="sig-paren">(</span><em>subject_number</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_gcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of all good channels for each subject</p>
+<p>Good channels are channels that were good in all blocks (said another way, they are channels which
+were never bad).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_number</strong> (<em>int</em>) &#8211; xx in ECxx</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>gcs</strong>: list of good channels</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(list of ints)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_sentence_numbers_sentence_types_speakers_for_subject_number">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_sentence_numbers_sentence_types_speakers_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>good_trials=None</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_sentence_numbers_sentence_types_speakers_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns lists of sentence, intonation, and speaker conditions with bad trials removed for a given subject</p>
+<p>Each list of conditions contains integers from 1 to 4, 1 to 4, and 1 to 3, respectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject_number</strong> (<em>int</em>) &#8211; xx in ECxx</li>
+<li><strong>good_trials</strong> (<em>list of lists</em>) &#8211; list of good trials in each block returned from get_times_hg_for_subject_number</li>
+<li><strong>control_stim</strong> (<em>bool</em>) &#8211; set to True for non-speech control_stim</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>sns</strong> (<em>list</em>): sentence conditions (sentence numbers, 1 to 4)</li>
+<li><strong>sts</strong> (<em>list</em>): intonation conditions (sentence types, 1 to 4)</li>
+<li><strong>sps</strong> (<em>list</em>): speaker conditions (speakers, 1 to 3)</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_stg">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_stg</code><span class="sig-paren">(</span><em>subject_number</em>, <em>path='Imaging/elecs/'</em>, <em>filename='TDT_elecs_all.mat'</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_stg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of electrode numbers that are on STG.</p>
+<p>Loads the anatomy files from the data_path + &#8216;EC&#8217; + subject_number + path + filename.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_time_averaged_data">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_time_averaged_data</code><span class="sig-paren">(</span><em>times_list</em>, <em>hg_list</em>, <em>window=6</em>, <em>hz=100</em>, <em>back=15</em>, <em>forward=285</em>, <em>zscore=True</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_time_averaged_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averages data in a moving window (each step is half a window) to smooth high-gamma for encoding analyses.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>window</strong> &#8211; number of samples in each window. Use an even number, so steps are an integer number of samples.</li>
+<li><strong>back</strong> &#8211; number of samples back in time, center of the first window</li>
+<li><strong>forward</strong> &#8211; center of the last window.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_timelocked_activity">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_timelocked_activity</code><span class="sig-paren">(</span><em>times</em>, <em>hg</em>, <em>zscore=True</em>, <em>hz=100</em>, <em>back=0</em>, <em>forward=250</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_timelocked_activity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a n_chans x n_timepoints x n_trials matrix of high-gamma activity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>times</strong> &#8211; times[0] contains trial start times in seconds.</li>
+<li><strong>hg</strong> &#8211; full time-series of high-gamma for multiple electrodes (n_chans x nt)</li>
+<li><strong>back</strong> &#8211; number of time samples to take preceding trial start</li>
+<li><strong>forward</strong> &#8211; number of time samples to take following trial start.</li>
+<li><strong>zscore_to_silence</strong> &#8211; boolean, whether z-scoring should be done to a prestimulus baseline</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.get_times_hg_for_subject_number">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">get_times_hg_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>only_good_trials=False</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em>, <em>use_log_hg=False</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.get_times_hg_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to process .mat data files, called by save_Y_mat_sns_sts_sps_for_subject_number</p>
+<p>For each subject, all block data (hg, times, bcs, and badTimeSegments) is loaded and neural data is processed
+(bad time segments are removed, i.e. set as NaN, and each channel is z-scored across time).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject_number</strong> (<em>int</em>) &#8211; xx in ECxx</li>
+<li><strong>only_good_trials</strong> (<em>bool</em>) &#8211; return only good_trials</li>
+<li><strong>control_stim</strong> (<em>bool</em>) &#8211; set as True to process non-speech control data</li>
+<li><strong>use_log_hg</strong> (<em>bool</em>) &#8211; return log hg instead of hg (log is taken for each high-gamma band and then averaged during preprocessing)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>times</strong> (<em>list of ndarrays</em>): list of stimulus onsets (seconds) for each block. Each item in times has dimensions 1 x number of trials</li>
+<li><strong>good_trials</strong> (<em>list of lists</em>): list of good trials for each block</li>
+<li><strong>hgs_toreturn</strong> (<em>list of ndarrays</em>): list of processed hg data for each block</li>
+<li><strong>gcs</strong> (<em>list</em>): good channels (channels that were good in every block)</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.load_Y_mat_sns_sts_sps_for_subject_number">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">load_Y_mat_sns_sts_sps_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.load_Y_mat_sns_sts_sps_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads data for analysis from file saved by save_Y_mat_sns_sts_sps_for_subject_number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>Y_mat</strong>: time averaged neural data for encoding analysis</li>
+<li><strong>sentence_numbers</strong>: list of sentence numbers (1, 2, 3, or 4)</li>
+<li><strong>sentence_types</strong>: list of sentence types or intonation conditions (1, 2, 3, 4)</li>
+<li><strong>speaker</strong>: list of speakers (1, 2, 3)</li>
+<li><strong>Y_mat_plotter</strong>: neural data for visualization (not time averaged).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(tuple)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="intonatang.intonation_preanalysis.save_Y_mat_sns_sts_sps_for_subject_number">
+<code class="descclassname">intonatang.intonation_preanalysis.</code><code class="descname">save_Y_mat_sns_sts_sps_for_subject_number</code><span class="sig-paren">(</span><em>subject_number</em>, <em>control_stim=False</em>, <em>missing_f0_stim=False</em>, <em>return_raw_data=False</em>, <em>zscore_to_silence=True</em><span class="sig-paren">)</span><a class="headerlink" href="#intonatang.intonation_preanalysis.save_Y_mat_sns_sts_sps_for_subject_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pre-analysis processing pipeline. Creates matrix of hg activity and lists of stimulus information.</p>
+<p>This function saves a .mat file called ECXXX_Y_mat.mat containing the variables:
+Y_mat, sentence_numbers, sentence_types, speakers, and Y_mat_plotter</p>
+<p>Y_mat is time-averaged data for encoding analysis.
+Y_mat_plotter is full time series data for visualization and use with the Plotter.labels</p>
+<p>To load the data that is saved, use load_Y_mat_sns_sts_sps_for_subject_number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subject_number</strong> (<em>int</em>) &#8211; xx in ECxx</li>
+<li><strong>control_stim</strong> (<em>bool</em>) &#8211; set to True for non-speech control_stim</li>
+<li><strong>return_raw_data</strong> (<em>bool</em>) &#8211; set to True to return (times, good_trials, hg, gcs) like get_times_hg_for_subject_number</li>
+<li><strong>zscore_to_silence</strong> (<em>bool</em>) &#8211; normalize neural data to pre-stimulus baseline rather than entire block</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="subject_metadata.html"
+                        title="previous chapter">Subject metadata</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoding.html"
+                        title="next chapter">Encoding and Variance Partitioning Analysis</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/preanalysis.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoding.html" title="Encoding and Variance Partitioning Analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="subject_metadata.html" title="Subject metadata"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Intonatang 2017.1.17 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016-2017, Claire Tang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>
