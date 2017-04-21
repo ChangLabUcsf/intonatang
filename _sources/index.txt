@@ -17,6 +17,7 @@ Contents:
    invariance
    timit
    pitch_trf
+   glossary
 
 Indices and tables
 ==================
