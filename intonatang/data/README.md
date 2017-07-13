@@ -9,7 +9,7 @@
 * [tokens](#tokens)
 * [tokens_missing_f0](#tokens_missing_f0)
 * [tokens_nonspeech](#tokens_nonspeech)
-* [pink_noise.mat]
+* [pink_noise.mat](#pink_noise)
 
 Below is an overview of what's contained in each directory. More details can be found in the README.md files within each directory.
 
@@ -52,3 +52,7 @@ Stimuli for the non-speech missing fundamental experiment.
 ## tokens_nonspeech
 
 Set of non-speech stimuli that preserves intonational pitch contour but removes spectral content related to phonetic features.
+
+## pink_noise
+
+This file contains the pink noise used in the missing f0 stimuli.
