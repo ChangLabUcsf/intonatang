@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(name="intonatang",
     description="Analysis code for speech intonation project",
-    version="2017.4.20",
+    version="2017.7.13",
     author="Claire Tang",
     author_email="clairetang6@gmail.com",
     packages=find_packages(),
