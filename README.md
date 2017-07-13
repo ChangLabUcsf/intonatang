@@ -2,6 +2,8 @@
 
 Analysis and visualization code for "Intonational Speech Prosody Encoding in Human Auditory Cortex"
 
+[![DOI](https://zenodo.org/badge/88897088.svg)](https://zenodo.org/badge/latestdoi/88897088)
+[![PyPI version](https://badge.fury.io/py/intonatang.svg)](https://badge.fury.io/py/intonatang)
 
 ## Example usage and figures
 
