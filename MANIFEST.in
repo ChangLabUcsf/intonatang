@@ -1,9 +1,10 @@
-include intonatang/data/brain_imaging/EC113*
-
+graft intonatang/data/brain_imaging
+graft intonatang/data/pitch
 graft intonatang/data/timit
 graft intonatang/data/timit_pitch
 graft intonatang/data/timit_tokens
 graft intonatang/data/tokens
+graft intonatang/data/tokens_missing_f0
 graft intonatang/data/tokens_nonspeech
 include intonatang/data/pink_noise.mat
 include intonatang/data/README.md

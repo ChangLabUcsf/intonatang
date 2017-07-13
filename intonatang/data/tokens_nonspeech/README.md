@@ -1,0 +1,3 @@
+# Intonation non-speech control tokens
+
+Set of non-speech stimuli that preserves intonational pitch contour but removes spectral content related to phonetic features. These stimuli also have varying amplitude contours corresponding to the sentence condition from the original set of speech stimuli. Each wav file is named purr_Z_stY_snX, where Z is either "female" or "male", Y indicates the intonation contour (1: Neutral, 2: Question, 3: Emphasis 1, 4: Emphasis 3), and X indicates which sentence condition the amplitude contour came from (1-4). Wav files without the ending _snX indicate that the amplitude contour for that acoustic signal was flat.
