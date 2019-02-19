@@ -5,6 +5,8 @@ Analysis and visualization code for "Intonational Speech Prosody Encoding in Hum
 [![DOI](https://zenodo.org/badge/88897088.svg)](https://zenodo.org/badge/latestdoi/88897088)
 [![PyPI version](https://badge.fury.io/py/intonatang.svg)](https://badge.fury.io/py/intonatang)
 
+Documentation can be found at [https://changlabucsf.github.io/intonatang/](https://changlabucsf.github.io/intonatang/)
+
 ## Example usage and figures
 
 For example usage, see the Jupyter notebook, Intonatang analysis demonstration.
